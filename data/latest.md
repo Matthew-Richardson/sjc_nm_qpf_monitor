@@ -1,6 +1,6 @@
 # San Juan County, New Mexico WPC QPF
 
-Generated UTC: 2026-10-30T16:00:11.234730+00:00
+Generated UTC: 2026-10-30T16:18:50.401998+00:00
 
 | Period | Avg (in) | Min (in) | Max (in) | Coverage | WPC issue |
 |---|---:|---:|---:|---:|---|

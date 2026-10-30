@@ -9159,7 +9159,7 @@
   },
   "watershed_source": "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer/4",
   "watershed_level": "USGS HUC8 full subbasins intersecting San Juan County, New Mexico",
-  "generated_utc": "2026-10-30T16:00:11.234730+00:00",
+  "generated_utc": "2026-10-30T16:18:50.401998+00:00",
   "location": "San Juan County NM",
   "source": "https://mapservices.weather.noaa.gov/vector/rest/services/precip/wpc_qpf/MapServer",
   "periods": {
