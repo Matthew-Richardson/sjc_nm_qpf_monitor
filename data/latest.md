@@ -1,13 +1,13 @@
 # San Juan County, New Mexico WPC QPF
 
-Generated UTC: 2026-10-30T16:18:50.401998+00:00
+Generated UTC: 2026-10-30T16:25:02.269093+00:00
 
 | Period | Avg (in) | Min (in) | Max (in) | Coverage | WPC issue |
 |---|---:|---:|---:|---:|---|
 | Day 1 | 0.16 | 0.01 | 0.50 | 100.0% | 2026-10-30 10:03:49 |
 | Day 2 | 0.01 | 0.01 | 0.01 | 100.0% | 2026-10-30 10:05:18 |
 | Day 3 | 0.64 | 0.25 | 1.75 | 100.0% | 2026-10-30 10:07:03 |
-| Days 4-5 | 0.00 | 0.00 | 0.01 | 13.6% | 2026-10-30 03:50:01 |
+| Days 4-5 | 0.00 | 0.00 | 0.00 | 0.0% | 2026-10-30 16:04:13 |
 | Days 6-7 | 0.00 | 0.00 | 0.00 | 0.0% | 2026-10-30 03:50:01 |
 | Days 1-7 | 0.94 | 0.25 | 2.00 | 100.0% | 2026-10-30 10:30:11 |
 
@@ -16,10 +16,10 @@ Generated UTC: 2026-10-30T16:18:50.401998+00:00
 Separate drainage-area averages; do not add. Forecast periods are not midnight-to-midnight days.
 | Drainage area | Area (sq mi) | Day 1 | Day 2 | Day 3 | Days 4–5 | Days 6–7 | Days 1–7 |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| Animas above Durango | 679.7 | 0.45 | 0.06 | 2.10 | 0.10 | 0.01 | 2.89 |
-| Animas Durango–Farmington only | 667.2 | 0.35 | 0.05 | 1.86 | 0.02 | 0.00 | 2.38 |
-| Navajo upstream basin | 3212.4 | 0.26 | 0.05 | 2.06 | 0.05 | 0.01 | 2.55 |
-| Navajo–Farmington excluding Animas | 2594.0 | 0.16 | 0.01 | 0.91 | 0.01 | 0.00 | 1.21 |
+| Animas above Durango | 679.7 | 0.45 | 0.06 | 2.10 | 0.00 | 0.01 | 2.89 |
+| Animas Durango–Farmington only | 667.2 | 0.35 | 0.05 | 1.86 | 0.00 | 0.00 | 2.38 |
+| Navajo upstream basin | 3212.4 | 0.26 | 0.05 | 2.06 | 0.00 | 0.01 | 2.55 |
+| Navajo–Farmington excluding Animas | 2594.0 | 0.16 | 0.01 | 0.91 | 0.00 | 0.00 | 1.21 |
 | Farmington–Shiprock only | 5463.8 | 0.14 | 0.01 | 0.56 | 0.00 | 0.00 | 0.85 |
 
 Geographic polygon differences, not subtraction of precipitation averages. Navajo uses the NLDI dam outlet flowline COMID 17040463. Independent NLDI boundaries may differ slightly from published drainage areas.
@@ -40,11 +40,11 @@ USGS NLDI basin delineations upstream of the monitored streamgages.
 
 | Gauge catchment | Day 1 | Day 2 | Day 3 | Days 4–5 | Days 6–7 | Days 1–7 |
 |---|---:|---:|---:|---:|---:|---:|
-| San Juan River at Farmington (09365000) | 0.25 | 0.04 | 1.63 | 0.04 | 0.01 | 2.08 |
-| San Juan River at Shiprock (09368000) | 0.20 | 0.03 | 1.17 | 0.02 | 0.00 | 1.55 |
-| La Plata River near Farmington (09367500) | 0.36 | 0.04 | 1.69 | 0.01 | 0.00 | 2.25 |
-| Animas River at Farmington (09364500) | 0.40 | 0.05 | 1.98 | 0.06 | 0.01 | 2.64 |
-| Animas River below Aztec (09364010) | 0.41 | 0.06 | 2.03 | 0.06 | 0.01 | 2.70 |
+| San Juan River at Farmington (09365000) | 0.25 | 0.04 | 1.63 | 0.00 | 0.01 | 2.08 |
+| San Juan River at Shiprock (09368000) | 0.20 | 0.03 | 1.17 | 0.00 | 0.00 | 1.55 |
+| La Plata River near Farmington (09367500) | 0.36 | 0.04 | 1.69 | 0.00 | 0.00 | 2.25 |
+| Animas River at Farmington (09364500) | 0.40 | 0.05 | 1.98 | 0.00 | 0.01 | 2.64 |
+| Animas River below Aztec (09364010) | 0.41 | 0.06 | 2.03 | 0.00 | 0.01 | 2.70 |
 
 ## Watershed QPF — full HUC8 subbasins
 
@@ -67,15 +67,15 @@ HUC8s are broad subbasins, not individual upstream gauge catchments.
 
 | Watershed | Day 1 | Day 2 | Day 3 | Days 4–5 | Days 6–7 | Days 1–7 |
 |---|---:|---:|---:|---:|---:|---:|
-| Animas (14080104) | 0.40 | 0.06 | 1.99 | 0.06 | 0.01 | 2.65 |
-| Blanco Canyon (14080103) | 0.14 | 0.01 | 0.89 | 0.01 | 0.00 | 1.19 |
+| Animas (14080104) | 0.40 | 0.06 | 1.99 | 0.00 | 0.01 | 2.65 |
+| Blanco Canyon (14080103) | 0.14 | 0.01 | 0.89 | 0.00 | 0.00 | 1.19 |
 | Chaco (14080106) | 0.11 | 0.01 | 0.40 | 0.00 | 0.00 | 0.64 |
 | Chinle (14080204) | 0.11 | 0.02 | 0.53 | 0.00 | 0.00 | 0.79 |
 | Lower San Juan-Four Corners (14080201) | 0.24 | 0.05 | 0.88 | 0.00 | 0.00 | 1.31 |
-| Mancos (14080107) | 0.37 | 0.02 | 1.34 | 0.02 | 0.00 | 1.91 |
-| Middle San Juan (14080105) | 0.25 | 0.02 | 0.89 | 0.01 | 0.00 | 1.30 |
+| Mancos (14080107) | 0.37 | 0.02 | 1.34 | 0.00 | 0.00 | 1.91 |
+| Middle San Juan (14080105) | 0.25 | 0.02 | 0.89 | 0.00 | 0.00 | 1.30 |
 | Upper Puerco (15020006) | 0.24 | 0.03 | 0.74 | 0.00 | 0.00 | 1.19 |
-| Upper San Juan (14080101) | 0.23 | 0.04 | 1.74 | 0.04 | 0.01 | 2.15 |
+| Upper San Juan (14080101) | 0.23 | 0.04 | 1.74 | 0.00 | 0.01 | 2.15 |
 
 ## Fine watershed QPF — USGS HUC10
 
@@ -189,46 +189,46 @@ Full HUC10 polygons intersecting San Juan County, New Mexico, plus upstream HUC1
 
 | HUC10 watershed | Day 1 | Day 2 | Day 3 | Days 4–5 | Days 6–7 | Days 1–7 |
 |---|---:|---:|---:|---:|---:|---:|
-| Amargo Canyon (1408010105) | 0.10 | 0.01 | 1.79 | 0.08 | 0.01 | 2.02 |
-| Armenta Canyon-San Juan River (1408010119) | 0.20 | 0.01 | 1.02 | 0.01 | 0.00 | 1.40 |
-| Beaver Creek (1408010113) | 0.48 | 0.04 | 2.39 | 0.01 | 0.00 | 2.97 |
-| Canon Bancos (1408010109) | 0.10 | 0.01 | 1.56 | 0.01 | 0.00 | 1.86 |
-| Cat Creek-San Juan River (1408010107) | 0.16 | 0.01 | 1.95 | 0.02 | 0.00 | 2.26 |
-| East Fork San Juan River (1408010101) | 0.21 | 0.13 | 2.69 | 0.10 | 0.03 | 3.18 |
+| Amargo Canyon (1408010105) | 0.10 | 0.01 | 1.79 | 0.00 | 0.01 | 2.02 |
+| Armenta Canyon-San Juan River (1408010119) | 0.20 | 0.01 | 1.02 | 0.00 | 0.00 | 1.40 |
+| Beaver Creek (1408010113) | 0.48 | 0.04 | 2.39 | 0.00 | 0.00 | 2.97 |
+| Canon Bancos (1408010109) | 0.10 | 0.01 | 1.56 | 0.00 | 0.00 | 1.86 |
+| Cat Creek-San Juan River (1408010107) | 0.16 | 0.01 | 1.95 | 0.00 | 0.00 | 2.26 |
+| East Fork San Juan River (1408010101) | 0.21 | 0.13 | 2.69 | 0.00 | 0.03 | 3.18 |
 | Gallegos Canyon (1408010120) | 0.13 | 0.01 | 0.70 | 0.00 | 0.00 | 0.93 |
-| Gobernador Canyon (1408010117) | 0.25 | 0.01 | 1.14 | 0.01 | 0.00 | 1.50 |
+| Gobernador Canyon (1408010117) | 0.25 | 0.01 | 1.14 | 0.00 | 0.00 | 1.50 |
 | Kutz Canyon-San Juan River (1408010121) | 0.19 | 0.01 | 0.81 | 0.00 | 0.00 | 1.14 |
-| La Jara Creek (1408010110) | 0.12 | 0.01 | 1.37 | 0.01 | 0.00 | 1.68 |
-| Lower Los Pinos River (1408010115) | 0.29 | 0.01 | 1.76 | 0.01 | 0.00 | 2.20 |
-| Middle Los Pinos River (1408010114) | 0.47 | 0.08 | 2.38 | 0.01 | 0.01 | 2.96 |
-| Navajo Reservoir (1408010116) | 0.23 | 0.01 | 1.46 | 0.01 | 0.00 | 1.81 |
-| Navajo River (1408010106) | 0.19 | 0.06 | 2.19 | 0.08 | 0.01 | 2.64 |
-| Pagosa Springs-San Juan River (1408010104) | 0.21 | 0.07 | 2.24 | 0.10 | 0.01 | 2.86 |
-| Pump Canyon (1408010118) | 0.25 | 0.01 | 1.53 | 0.01 | 0.00 | 1.88 |
-| Rio Blanco (1408010103) | 0.24 | 0.11 | 2.50 | 0.10 | 0.03 | 3.14 |
-| San Juan River-Navajo Reservoir (1408010108) | 0.14 | 0.01 | 1.74 | 0.01 | 0.00 | 2.06 |
-| Upper Los Pinos River (1408010111) | 0.49 | 0.08 | 2.38 | 0.07 | 0.01 | 3.07 |
-| Vallecito Creek (1408010112) | 0.58 | 0.10 | 2.56 | 0.09 | 0.01 | 3.36 |
-| West Fork San Juan River (1408010102) | 0.26 | 0.11 | 2.82 | 0.10 | 0.03 | 3.28 |
+| La Jara Creek (1408010110) | 0.12 | 0.01 | 1.37 | 0.00 | 0.00 | 1.68 |
+| Lower Los Pinos River (1408010115) | 0.29 | 0.01 | 1.76 | 0.00 | 0.00 | 2.20 |
+| Middle Los Pinos River (1408010114) | 0.47 | 0.08 | 2.38 | 0.00 | 0.01 | 2.96 |
+| Navajo Reservoir (1408010116) | 0.23 | 0.01 | 1.46 | 0.00 | 0.00 | 1.81 |
+| Navajo River (1408010106) | 0.19 | 0.06 | 2.19 | 0.00 | 0.01 | 2.64 |
+| Pagosa Springs-San Juan River (1408010104) | 0.21 | 0.07 | 2.24 | 0.00 | 0.01 | 2.86 |
+| Pump Canyon (1408010118) | 0.25 | 0.01 | 1.53 | 0.00 | 0.00 | 1.88 |
+| Rio Blanco (1408010103) | 0.24 | 0.11 | 2.50 | 0.00 | 0.03 | 3.14 |
+| San Juan River-Navajo Reservoir (1408010108) | 0.14 | 0.01 | 1.74 | 0.00 | 0.00 | 2.06 |
+| Upper Los Pinos River (1408010111) | 0.49 | 0.08 | 2.38 | 0.00 | 0.01 | 3.07 |
+| Vallecito Creek (1408010112) | 0.58 | 0.10 | 2.56 | 0.00 | 0.01 | 3.36 |
+| West Fork San Juan River (1408010102) | 0.26 | 0.11 | 2.82 | 0.00 | 0.03 | 3.28 |
 | Blanco Canyon (1408010305) | 0.17 | 0.01 | 0.78 | 0.00 | 0.00 | 1.07 |
-| Canada Larga (1408010302) | 0.12 | 0.01 | 0.99 | 0.01 | 0.00 | 1.26 |
-| Carrizo Creek (1408010304) | 0.17 | 0.01 | 1.03 | 0.01 | 0.00 | 1.39 |
-| Headwaters Canon Largo (1408010301) | 0.12 | 0.01 | 0.76 | 0.01 | 0.00 | 1.04 |
-| Outlet Canon Largo (1408010306) | 0.14 | 0.01 | 0.82 | 0.01 | 0.00 | 1.09 |
-| Tapicito Creek (1408010303) | 0.10 | 0.01 | 0.99 | 0.01 | 0.00 | 1.29 |
-| Animas River Canyon (1408010403) | 0.40 | 0.10 | 2.18 | 0.10 | 0.01 | 2.95 |
-| Cascade Creek (1408010402) | 0.50 | 0.09 | 2.15 | 0.10 | 0.01 | 2.99 |
+| Canada Larga (1408010302) | 0.12 | 0.01 | 0.99 | 0.00 | 0.00 | 1.26 |
+| Carrizo Creek (1408010304) | 0.17 | 0.01 | 1.03 | 0.00 | 0.00 | 1.39 |
+| Headwaters Canon Largo (1408010301) | 0.12 | 0.01 | 0.76 | 0.00 | 0.00 | 1.04 |
+| Outlet Canon Largo (1408010306) | 0.14 | 0.01 | 0.82 | 0.00 | 0.00 | 1.09 |
+| Tapicito Creek (1408010303) | 0.10 | 0.01 | 0.99 | 0.00 | 0.00 | 1.29 |
+| Animas River Canyon (1408010403) | 0.40 | 0.10 | 2.18 | 0.00 | 0.01 | 2.95 |
+| Cascade Creek (1408010402) | 0.50 | 0.09 | 2.15 | 0.00 | 0.01 | 2.99 |
 | City of Farmington-Animas River (1408010410) | 0.25 | 0.01 | 1.35 | 0.00 | 0.00 | 1.75 |
-| Electra Lake-Animas River (1408010405) | 0.55 | 0.08 | 2.27 | 0.06 | 0.01 | 3.09 |
-| Headwaters Animas River (1408010401) | 0.25 | 0.02 | 1.79 | 0.13 | 0.01 | 2.37 |
-| Headwaters Florida River (1408010407) | 0.68 | 0.10 | 2.75 | 0.06 | 0.01 | 3.67 |
-| Hermosa Creek (1408010404) | 0.53 | 0.04 | 2.17 | 0.10 | 0.01 | 3.07 |
-| Lightner Creek-Animas River (1408010406) | 0.56 | 0.10 | 2.35 | 0.04 | 0.00 | 3.14 |
-| Middle Animas Valley (1408010409) | 0.27 | 0.07 | 1.91 | 0.01 | 0.00 | 2.34 |
-| Outlet Florida River (1408010408) | 0.28 | 0.03 | 1.95 | 0.01 | 0.00 | 2.38 |
+| Electra Lake-Animas River (1408010405) | 0.55 | 0.08 | 2.27 | 0.00 | 0.01 | 3.09 |
+| Headwaters Animas River (1408010401) | 0.25 | 0.02 | 1.79 | 0.00 | 0.01 | 2.37 |
+| Headwaters Florida River (1408010407) | 0.68 | 0.10 | 2.75 | 0.00 | 0.01 | 3.67 |
+| Hermosa Creek (1408010404) | 0.53 | 0.04 | 2.17 | 0.00 | 0.01 | 3.07 |
+| Lightner Creek-Animas River (1408010406) | 0.56 | 0.10 | 2.35 | 0.00 | 0.00 | 3.14 |
+| Middle Animas Valley (1408010409) | 0.27 | 0.07 | 1.91 | 0.00 | 0.00 | 2.34 |
+| Outlet Florida River (1408010408) | 0.28 | 0.03 | 1.95 | 0.00 | 0.00 | 2.38 |
 | Barker Arroyo-La Plata River (1408010503) | 0.25 | 0.01 | 1.10 | 0.00 | 0.00 | 1.53 |
 | Beclabito Wash-San Juan River (1408010510) | 0.24 | 0.01 | 0.49 | 0.00 | 0.00 | 0.81 |
-| Headwaters La Plata River (1408010501) | 0.45 | 0.05 | 1.98 | 0.02 | 0.00 | 2.66 |
+| Headwaters La Plata River (1408010501) | 0.45 | 0.05 | 1.98 | 0.00 | 0.00 | 2.66 |
 | McDermott Arroyo-La Plata River (1408010502) | 0.25 | 0.03 | 1.52 | 0.00 | 0.00 | 1.96 |
 | Ojo Amarillo Canyon-San Juan River (1408010505) | 0.17 | 0.01 | 0.75 | 0.00 | 0.00 | 1.09 |
 | Rattlesnake Wash-San Juan River (1408010507) | 0.14 | 0.01 | 0.42 | 0.00 | 0.00 | 0.72 |
@@ -237,13 +237,13 @@ Full HUC10 polygons intersecting San Juan County, New Mexico, plus upstream HUC1
 | Shiprock Wash (1408010508) | 0.12 | 0.01 | 0.30 | 0.00 | 0.00 | 0.56 |
 | Shumway Arroyo (1408010504) | 0.25 | 0.01 | 0.87 | 0.00 | 0.00 | 1.26 |
 | Ah-shi-sle-pah Wash-Chaco River (1408010606) | 0.13 | 0.01 | 0.48 | 0.00 | 0.00 | 0.73 |
-| Canada Alemita-Chaco Wash (1408010601) | 0.10 | 0.01 | 0.55 | 0.01 | 0.00 | 0.80 |
+| Canada Alemita-Chaco Wash (1408010601) | 0.10 | 0.01 | 0.55 | 0.00 | 0.00 | 0.80 |
 | Captain Tom Wash (1408010616) | 0.13 | 0.01 | 0.51 | 0.00 | 0.00 | 0.76 |
 | Coal Creek-Chaco River (1408010620) | 0.10 | 0.01 | 0.39 | 0.00 | 0.00 | 0.65 |
 | Coyote Wash-Chaco River (1408010615) | 0.10 | 0.01 | 0.29 | 0.00 | 0.00 | 0.52 |
 | De-na-zin Wash (1408010607) | 0.21 | 0.01 | 0.57 | 0.00 | 0.00 | 0.89 |
 | Dead Mans Wash (1408010619) | 0.10 | 0.01 | 0.27 | 0.00 | 0.00 | 0.52 |
-| Escavada Wash (1408010603) | 0.15 | 0.01 | 0.53 | 0.01 | 0.00 | 0.91 |
+| Escavada Wash (1408010603) | 0.15 | 0.01 | 0.53 | 0.00 | 0.00 | 0.91 |
 | Fajada Wash (1408010602) | 0.10 | 0.01 | 0.40 | 0.00 | 0.00 | 0.55 |
 | Figueredo Wash (1408010609) | 0.14 | 0.01 | 0.55 | 0.00 | 0.00 | 0.86 |
 | Headwaters Coyote Wash (1408010610) | 0.10 | 0.01 | 0.36 | 0.00 | 0.00 | 0.60 |
@@ -256,9 +256,9 @@ Full HUC10 polygons intersecting San Juan County, New Mexico, plus upstream HUC1
 | Sanostee Wash (1408010617) | 0.12 | 0.01 | 0.43 | 0.00 | 0.00 | 0.69 |
 | Sanostee Wash-Chaco River (1408010618) | 0.10 | 0.01 | 0.41 | 0.00 | 0.00 | 0.61 |
 | Standing Rock Wash (1408010611) | 0.09 | 0.01 | 0.27 | 0.00 | 0.00 | 0.53 |
-| Lower Mancos River (1408010703) | 0.28 | 0.01 | 0.89 | 0.01 | 0.00 | 1.37 |
-| Middle Mancos River (1408010702) | 0.33 | 0.01 | 1.33 | 0.01 | 0.00 | 1.82 |
-| Upper Mancos River (1408010701) | 0.59 | 0.04 | 2.10 | 0.05 | 0.01 | 2.91 |
+| Lower Mancos River (1408010703) | 0.28 | 0.01 | 0.89 | 0.00 | 0.00 | 1.37 |
+| Middle Mancos River (1408010702) | 0.33 | 0.01 | 1.33 | 0.00 | 0.00 | 1.82 |
+| Upper Mancos River (1408010701) | 0.59 | 0.04 | 2.10 | 0.00 | 0.01 | 2.91 |
 | Comb Wash-San Juan River (1408020107) | 0.18 | 0.09 | 1.03 | 0.00 | 0.00 | 1.42 |
 | Cottonwood Wash (1408020104) | 0.26 | 0.09 | 1.32 | 0.00 | 0.00 | 1.80 |
 | Desert Creek-San Juan River (1408020105) | 0.23 | 0.01 | 0.67 | 0.00 | 0.00 | 1.09 |
@@ -283,11 +283,11 @@ Full HUC10 polygons intersecting San Juan County, New Mexico, plus upstream HUC1
 | Walker Creek (1408020416) | 0.14 | 0.01 | 0.35 | 0.00 | 0.00 | 0.66 |
 | Wheatfields Creek (1408020401) | 0.41 | 0.01 | 1.00 | 0.00 | 0.00 | 1.60 |
 | Whiskey Creek (1408020402) | 0.26 | 0.01 | 0.93 | 0.00 | 0.00 | 1.43 |
-| Defiance Draw-Puerco River (1502000604) | 0.27 | 0.01 | 0.73 | 0.01 | 0.00 | 1.15 |
+| Defiance Draw-Puerco River (1502000604) | 0.27 | 0.01 | 0.73 | 0.00 | 0.00 | 1.15 |
 | Hard Ground Canyon-Puerco River (1502000602) | 0.14 | 0.01 | 0.48 | 0.00 | 0.00 | 0.76 |
 | Lower Black Creek (1502000606) | 0.25 | 0.09 | 0.94 | 0.00 | 0.00 | 1.47 |
 | Manuelito Canyon-Puerco River (1502000607) | 0.31 | 0.04 | 0.76 | 0.00 | 0.00 | 1.32 |
-| South Fork Puerco River (1502000601) | 0.16 | 0.01 | 0.53 | 0.01 | 0.00 | 0.85 |
+| South Fork Puerco River (1502000601) | 0.16 | 0.01 | 0.53 | 0.00 | 0.00 | 0.85 |
 | Upper Black Creek (1502000603) | 0.25 | 0.02 | 0.92 | 0.00 | 0.00 | 1.38 |
 | Whitewater Arroyo (1502000605) | 0.34 | 0.01 | 0.75 | 0.00 | 0.00 | 1.30 |
 
