@@ -1,0 +1,93 @@
+name: San Juan NM WPC QPF
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 12,13,0,1 * * *'
+  push:
+    branches: [main]
+    paths:
+      - 'qpf_monitor.py'
+      - 'nbm_monitor.py'
+      - 'groupme_notify.py'
+      - 'operational_monitor.py'
+      - 'snow_monitor.py'
+      - 'requirements.txt'
+      - 'tests/**'
+      - '.github/workflows/qpf.yml'
+      - '.chatgpt-trigger'
+permissions:
+  contents: write
+concurrency:
+  group: san-juan-nm-qpf
+  cancel-in-progress: false
+jobs:
+  calculate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      run: ${{ steps.slot.outputs.run }}
+    steps:
+      - name: Select Mountain Time morning/evening slot
+        id: slot
+        run: |
+          hour=$(TZ=America/Denver date +%H)
+          if [[ "${{ github.event_name }}" != "schedule" || "$hour" == "06" || "$hour" == "18" ]]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+  monitor:
+    needs: calculate
+    if: needs.calculate.outputs.run == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Verify calculations
+        run: python -m pytest -q
+      - name: Snapshot prior verified forecast
+        run: |
+          mkdir -p data
+          git show HEAD:data/latest.json > data/previous.json 2>/dev/null || rm -f data/previous.json
+      - name: Query live WPC and county boundary
+        run: python qpf_monitor.py
+      - name: Analyze NOAA snowfall probabilities
+        run: python snow_monitor.py
+      - name: Save validated output
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/latest.json data/latest.md
+          if ! git diff --staged --quiet; then
+            git commit -m "Refresh verified WPC county forecast"
+            git push
+          fi
+      - name: Notify GroupMe on rainfall, river, flood or timing changes
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.event.head_commit.message == 'Trigger scheduled QPF check') }}
+        env:
+          GROUPME_BOT_ID: ${{ secrets.GROUPME_BOT_ID }}
+        run: |
+          if [ -n "$GROUPME_BOT_ID" ]; then
+            python groupme_notify.py ${{ github.event_name == 'workflow_dispatch' && '--force' || '' }}
+          else
+            python groupme_notify.py --preview
+          fi
+      - name: Persist notification status after successful delivery
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.event.head_commit.message == 'Trigger scheduled QPF check') }}
+        run: |
+          git add data/operational_latest.json
+          if [ -f data/notification_state.json ]; then git add data/notification_state.json; fi
+          if ! git diff --staged --quiet; then
+            git commit -m "Save GroupMe notification state"
+            git push
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qpf-output
+          path: data/
+
+
+

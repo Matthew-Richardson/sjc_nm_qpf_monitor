@@ -1,0 +1,276 @@
+"""Area-weighted San Juan County, New Mexico WPC quantitative precipitation forecasts."""
+import json
+from datetime import datetime, timezone
+from pathlib import Path
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+from shapely.geometry import shape
+from shapely.ops import transform, unary_union
+from pyproj import Transformer
+from nbm_monitor import calculate as calculate_nbm
+
+WPC="https://mapservices.weather.noaa.gov/vector/rest/services/precip/wpc_qpf/MapServer"
+COUNTY="https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/27"
+WATERSHEDS="https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer/4"
+WATERSHEDS10="https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer/5"
+NLDI="https://api.water.usgs.gov/nldi"
+LAYERS={"Day 1":1,"Day 2":2,"Day 3":3,"Days 4-5":4,"Days 6-7":5,"Days 1-7":11}
+GAUGE_CATCHMENTS={
+    "09365000":{"label":"San Juan Farmington","name":"San Juan River at Farmington"},
+    "09368000":{"label":"San Juan Shiprock","name":"San Juan River at Shiprock"},
+    "09367500":{"label":"La Plata","name":"La Plata River near Farmington"},
+    "09364500":{"label":"Animas Farmington","name":"Animas River at Farmington"},
+    "09364010":{"label":"Animas Aztec","name":"Animas River below Aztec"},
+}
+PROJECT=Transformer.from_crs("EPSG:4326","EPSG:5070",always_xy=True).transform
+SESSION=requests.Session()
+SESSION.headers["User-Agent"]="SanJuanNM-QPF-Monitor/1.0"
+SESSION.mount("https://",HTTPAdapter(max_retries=Retry(
+    total=4,connect=4,read=4,status=4,backoff_factor=1,
+    status_forcelist=(429,500,502,503,504),allowed_methods={"GET"})))
+
+def fetch(url,params):
+    r=SESSION.get(url,params=params,timeout=90)
+    r.raise_for_status()
+    obj=r.json()
+    if "error" in obj: raise RuntimeError(str(obj["error"]))
+    return obj
+
+def features(url,params):
+    result=[]
+    for offset in range(0,20000,500):
+        q={**params,"f":"geojson","resultOffset":offset,"resultRecordCount":500}
+        doc=fetch(url+"/query",q)
+        if doc.get("type")!="FeatureCollection": raise RuntimeError("Expected GeoJSON from "+url)
+        chunk=doc.get("features",[])
+        result.extend(chunk)
+        if len(chunk)<500 and not doc.get("exceededTransferLimit"): return result
+        if not chunk: return result
+    raise RuntimeError("Pagination limit reached "+url)
+
+def county():
+    fs=features(COUNTY,{"where":"GEOID='35045'","outFields":"GEOID,NAME","outSR":4326,"returnGeometry":"true"})
+    if len(fs)!=1: raise RuntimeError("Expected one county, got "+str(len(fs)))
+    return shape(fs[0]["geometry"])
+
+def watershed_geometries(county_geom):
+    """Full USGS HUC8 subbasins intersecting San Juan County, New Mexico, including upstream/out-of-county area."""
+    xmin,ymin,xmax,ymax=county_geom.bounds
+    fs=features(WATERSHEDS,{"where":"1=1","outFields":"huc8,name,states",
+        "geometry":f"{xmin},{ymin},{xmax},{ymax}",
+        "geometryType":"esriGeometryEnvelope","inSR":4326,
+        "spatialRel":"esriSpatialRelIntersects","outSR":4326,"returnGeometry":"true"})
+    result={}
+    for feature in fs:
+        props=feature["properties"]
+        boundary=shape(feature["geometry"])
+        if not boundary.is_valid: boundary=boundary.buffer(0)
+        if boundary.intersection(county_geom).area<=0: continue
+        code=str(props.get("huc8") or "")
+        if len(code)!=8 or not code.isdigit(): raise RuntimeError("Invalid USGS HUC8 identifier")
+        if code in result: raise RuntimeError("Duplicate HUC8 identifier "+code)
+        result[code]={"name":props.get("name") or code,"geometry":boundary}
+    if not result: raise RuntimeError("No USGS watersheds intersect San Juan County, New Mexico")
+    return result
+
+def fine_watershed_geometries(county_geom, huc8_basins):
+    """USGS HUC10 units contained within locally relevant HUC8 basins.
+    Include the complete HUC8 basins that intersect the county, preserving upstream areas.
+    """
+    xmin,ymin,xmax,ymax=county_geom.bounds
+    fs=features(WATERSHEDS10,{"where":"1=1","outFields":"huc10,name,states",
+        "geometry":f"{xmin-0.05},{ymin-0.05},{xmax+0.05},{ymax+0.05}",
+        "geometryType":"esriGeometryEnvelope","inSR":4326,
+        "spatialRel":"esriSpatialRelIntersects","outSR":4326,"returnGeometry":"true"})
+    result={}
+    for ft in fs:
+        prop=ft["properties"]
+        code=str(prop.get("huc10") or "")
+        if len(code)!=10 or not code.isdigit():
+            raise RuntimeError("Invalid HUC10 identifier "+code)
+        g=shape(ft["geometry"])
+        if not g.is_valid: g=g.buffer(0)
+        if g.intersection(county_geom).area <= 0: continue
+        if code in result: raise RuntimeError("Duplicate HUC10 "+code)
+        result[code]={"name":prop.get("name") or code,"geometry":g,"parent_huc8":code[:8]}
+    # Include upstream HUC10 units throughout each county-intersecting HUC8.
+    upper=features(WATERSHEDS10,{"where":" OR ".join(f"huc10 LIKE '{code}%'" for code in huc8_basins) or "1=0",
+        "outFields":"huc10,name,states","outSR":4326,"returnGeometry":"true"})
+    for ft in upper:
+        prop=ft["properties"]
+        code=str(prop.get("huc10") or "")
+        if len(code)!=10 or not code.isdigit(): raise RuntimeError("Invalid upstream HUC10 "+code)
+        if code in result: continue
+        g=shape(ft["geometry"])
+        if not g.is_valid: g=g.buffer(0)
+        if g.is_empty: continue
+        result[code]={"name":prop.get("name") or code,"geometry":g,"parent_huc8":code[:8]}
+    if not result: raise RuntimeError("No HUC10 basins found")
+    return result
+
+def gauge_catchment_geometries():
+    """USGS NLDI upstream basin delineations for the monitored streamgages."""
+    result={}
+    for site,metadata in GAUGE_CATCHMENTS.items():
+        url=f"{NLDI}/linked-data/nwissite/USGS-{site}/basin"
+        doc=fetch(url,{"f":"json"})
+        rows=doc.get("features",[]) if doc.get("type")=="FeatureCollection" else []
+        if len(rows)!=1: raise RuntimeError(f"Expected one upstream basin for USGS {site}, got {len(rows)}")
+        boundary=shape(rows[0]["geometry"])
+        if not boundary.is_valid: boundary=boundary.buffer(0)
+        if boundary.is_empty: raise RuntimeError(f"Empty upstream basin for USGS {site}")
+        result[site]={**metadata,"site":site,"geometry":boundary,"source":url}
+    return result
+
+def summarize(region,fs):
+    region=transform(PROJECT,region)
+    parts=[]; amounts=[]; issue=set(); times=set()
+    for f in fs:
+        p=f["properties"]
+        if p.get("qpf") is None: continue
+        if str(p.get("units","inches")).lower() not in ("in","inch","inches",""): raise RuntimeError("Unknown QPF units "+str(p.get("units")))
+        g=shape(f["geometry"])
+        if not g.is_valid: g=g.buffer(0)
+        if g.is_empty: continue
+        clip=transform(PROJECT,g).intersection(region)
+        if clip.area>0:
+            parts.append((clip,float(p["qpf"])))
+            if p.get("issue_time"): issue.add(str(p["issue_time"]))
+            times.add((str(p.get("start_time")),str(p.get("end_time"))))
+    if not parts:
+        return {"average_in":0.0,"min_in":0.0,"max_in":0.0,"coverage_pct":0.0,
+                "issue_time":None,"valid_period":None,
+                "note":"No WPC mapped precipitation polygons intersect the county; below display threshold, not necessarily exactly zero."}
+    if len(issue)>1 or len(times)>1: raise RuntimeError("Mixed forecast issue/valid periods: "+str((issue,times)))
+    # Disallow overlapping polygon classes; no double counting.
+    covered=unary_union([p[0] for p in parts])
+    overlap=sum(p[0].area for p in parts)-covered.area
+    if overlap>region.area*0.002: raise RuntimeError("Overlapping forecast polygons exceed tolerance")
+    coverage=covered.area/region.area
+    # WPC contours describe precipitation >= the first mapped amount; uncovered areas are below that contour.
+    # Do not require polygons to tile the entire county. Treat uncovered area as 0 for a lower-bound mean.
+    weighted=sum(g.area*v for g,v in parts)/region.area
+    return {"average_in":round(weighted,3),"min_in":0.0 if coverage<0.999 else min(v for _,v in parts),"max_in":max(v for _,v in parts),
+            "coverage_pct":round(coverage*100,2),"issue_time":next(iter(issue),None),
+            "valid_period":next(iter(times),None),
+            "note":"Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."}
+
+def run():
+    geom=county()
+    watershed_errors=[]
+    try:
+        basins=watershed_geometries(geom)
+    except Exception as exc:
+        basins={}
+        watershed_errors.append("HUC8: "+str(exc))
+        print("Optional HUC8 watershed detail unavailable:",exc)
+    try:
+        fine_basins=fine_watershed_geometries(geom,basins)
+    except Exception as exc:
+        fine_basins={}
+        watershed_errors.append("HUC10: "+str(exc))
+        print("Optional HUC10 watershed detail unavailable:",exc)
+    catchments=gauge_catchment_geometries()
+    from shapely.ops import unary_union as union
+    extent=union([geom]+[b["geometry"] for b in basins.values()]+[b["geometry"] for b in fine_basins.values()]+[b["geometry"] for b in catchments.values()])
+    xmin,ymin,xmax,ymax=extent.bounds
+    bbox=f"{xmin-0.05},{ymin-0.05},{xmax+0.05},{ymax+0.05}"
+    output={}
+    watershed_output={code:{"name":v["name"],"huc8":code,"periods":{}} for code,v in basins.items()}
+    fine_output={code:{"name":v["name"],"huc10":code,"parent_huc8":v["parent_huc8"],"periods":{}} for code,v in fine_basins.items()}
+    catchment_output={site:{"label":v["label"],"name":v["name"],"site":site,"source":v["source"],"periods":{}} for site,v in catchments.items()}
+    for label,layer in LAYERS.items():
+        f=features(f"{WPC}/{layer}",{"where":"1=1","outFields":"qpf,units,issue_time,start_time,end_time",
+               "geometry":bbox,"geometryType":"esriGeometryEnvelope","inSR":4326,
+               "spatialRel":"esriSpatialRelIntersects","outSR":4326,"returnGeometry":"true"})
+        output[label]=summarize(geom,f)
+        for code,basin in basins.items():
+            watershed_output[code]["periods"][label]=summarize(basin["geometry"],f)
+        for code,basin in fine_basins.items():
+            fine_output[code]["periods"][label]=summarize(basin["geometry"],f)
+        for site,catchment in catchments.items():
+            catchment_output[site]["periods"][label]=summarize(catchment["geometry"],f)
+        if not output[label]["issue_time"]:
+            # Metadata query establishes product issuance even if no mapped polygon reaches the county.
+            doc=fetch(f"{WPC}/{layer}/query",{"f":"json","where":"1=1",
+                     "outFields":"issue_time,start_time,end_time","returnGeometry":"false",
+                     "resultRecordCount":1})
+            meta=doc.get("features",[])
+            if not meta: raise RuntimeError(f"WPC layer {layer} returned no issuance metadata")
+            attr=meta[0]["attributes"]
+            output[label]["issue_time"]=attr.get("issue_time")
+            output[label]["valid_period"]=[attr.get("start_time"),attr.get("end_time")]
+    nbm_regions={"county":geom}
+    nbm_regions.update({site:catchment["geometry"] for site,catchment in catchments.items()})
+    try:
+        nbm=calculate_nbm(nbm_regions)
+    except Exception as exc:
+        nbm={"status":"unavailable","source":"https://noaa-nbm-grib2-pds.s3.amazonaws.com","error":str(exc)}
+        print("NBM comparison unavailable:",exc)
+    report={"area_schema":"san-juan-nm-gauge-catchments-v1","gauge_catchments":catchment_output,"gauge_catchment_source":NLDI,
+            "optional_watershed_status":"unavailable" if watershed_errors else "available",
+            "optional_watershed_errors":watershed_errors,
+            "huc10_watersheds":fine_output,"huc10_source":WATERSHEDS10,"watersheds":watershed_output,"watershed_source":WATERSHEDS,"watershed_level":"USGS HUC8 full subbasins intersecting San Juan County, New Mexico",
+            "generated_utc":datetime.now(timezone.utc).isoformat(),"location":"San Juan County NM",
+            "source":WPC,"periods":output,"nbm":nbm,"caveats":"QPF averages are forecast liquid-equivalent amounts, not observed rainfall or flood probabilities."}
+    Path("data").mkdir(exist_ok=True)
+    Path("data/latest.json").write_text(json.dumps(report,indent=2)+"\n")
+    lines=["# San Juan County, New Mexico WPC QPF","",f"Generated UTC: {report['generated_utc']}","","| Period | Avg (in) | Min (in) | Max (in) | Coverage | WPC issue |","|---|---:|---:|---:|---:|---|"]
+    for label,p in output.items():
+        lines.append(f"| {label} | {p['average_in']:.2f} | {p['min_in']:.2f} | {p['max_in']:.2f} | {p['coverage_pct']:.1f}% | {p['issue_time']} |")
+    lines.extend(["", "## Gauge-upstream catchment QPF", "",
+        "USGS NLDI basin delineations upstream of the monitored streamgages.", "",
+        "| Gauge catchment | USGS site | Days 1–7 avg (in) | Min (in) | Max (in) | Coverage |",
+        "|---|---|---:|---:|---:|---:|"])
+    for site,catchment in catchment_output.items():
+        q=catchment["periods"]["Days 1-7"]
+        lines.append(f"| {catchment['name']} | {site} | {q['average_in']:.2f} | {q['min_in']:.2f} | {q['max_in']:.2f} | {q['coverage_pct']:.1f}% |")
+    lines.extend(["", "### Gauge-catchment breakdown by forecast period", "",
+        "| Gauge catchment | Day 1 | Day 2 | Day 3 | Days 4–5 | Days 6–7 | Days 1–7 |",
+        "|---|---:|---:|---:|---:|---:|---:|"])
+    for site,catchment in catchment_output.items():
+        p=catchment["periods"]
+        lines.append("| "+catchment["name"]+" ("+site+") | "+" | ".join(f"{p[label]['average_in']:.2f}" for label in LAYERS)+" |")
+    lines.extend(["", "## Watershed QPF — full HUC8 subbasins", "",
+          "These USGS subbasins intersect San Juan County, New Mexico but include their full mapped drainage area outside county lines.",
+          "HUC8s are broad subbasins, not individual upstream gauge catchments.", "",
+          "| Watershed | HUC8 | Days 1–7 avg (in) | Min (in) | Max (in) | Coverage |",
+          "|---|---|---:|---:|---:|---:|"])
+    for code, basin in sorted(watershed_output.items(),key=lambda x:x[1]["name"]):
+        q=basin["periods"]["Days 1-7"]
+        lines.append(f"| {basin['name']} | {code} | {q['average_in']:.2f} | {q['min_in']:.2f} | {q['max_in']:.2f} | {q['coverage_pct']:.1f}% |")
+    lines.extend(["", "### Forecast-period breakdown by watershed", "",
+                  "| Watershed | Day 1 | Day 2 | Day 3 | Days 4–5 | Days 6–7 | Days 1–7 |",
+                  "|---|---:|---:|---:|---:|---:|---:|"])
+    for code, basin in sorted(watershed_output.items(),key=lambda x:x[1]["name"]):
+        p=basin["periods"]
+        lines.append("| "+basin["name"]+" ("+code+") | "+" | ".join(f"{p[label]['average_in']:.2f}" for label in LAYERS)+" |")
+    lines.extend(["", "## Fine watershed QPF — USGS HUC10", "",
+       "Full HUC10 polygons intersecting San Juan County, New Mexico, plus upstream HUC10 units within county-intersecting HUC8 basins.", "",
+       "| HUC10 watershed | HUC10 | Parent HUC8 | 7-day avg (in) | Min (in) | Max (in) |",
+       "|---|---|---|---:|---:|---:|"])
+    for code,basin in sorted(fine_output.items(),key=lambda x:(x[1]["parent_huc8"],x[1]["name"])):
+        q=basin["periods"]["Days 1-7"]
+        lines.append(f"| {basin['name']} | {code} | {basin['parent_huc8']} | {q['average_in']:.2f} | {q['min_in']:.2f} | {q['max_in']:.2f} |")
+    lines.extend(["", "### HUC10 breakdown by forecast period", "",
+        "| HUC10 watershed | Day 1 | Day 2 | Day 3 | Days 4–5 | Days 6–7 | Days 1–7 |",
+        "|---|---:|---:|---:|---:|---:|---:|"])
+    for code,basin in sorted(fine_output.items(),key=lambda x:(x[1]["parent_huc8"],x[1]["name"])):
+        p=basin["periods"]
+        lines.append("| "+basin["name"]+" ("+code+") | "+" | ".join(f"{p[label]['average_in']:.2f}" for label in LAYERS)+" |")
+    lines.extend(["", "## NBM seven-day comparison", ""])
+    if nbm.get("status")=="complete":
+        lines.extend([f"Cycle UTC: {nbm['cycle_utc']}", "", "| Area | NBM avg (in) | Grid points |", "|---|---:|---:|"])
+        names={"county":"San Juan County, New Mexico",**{site:row["name"] for site,row in GAUGE_CATCHMENTS.items()}}
+        for code,row in nbm["totals"].items():
+            lines.append(f"| {names.get(code,code)} | {row['average_in']:.2f} | {row['grid_points']} |")
+    else:
+        lines.append("Unavailable for this run: "+nbm.get("error","unknown error"))
+    lines.extend(["",report["caveats"],"",
+        "Gauge catchments are USGS NLDI basin delineations. They improve gauge-specific QPF comparison but do not reproduce reservoir operations or NWS river-model routing.",
+        f"Source: {WPC}",f"Gauge catchments: {NLDI}",f"Watershed boundaries: {WATERSHEDS}; {WATERSHEDS10}"])
+    Path("data/latest.md").write_text("\n".join(lines)+"\n")
+    print("\n".join(lines))
+if __name__=="__main__": run()
+
