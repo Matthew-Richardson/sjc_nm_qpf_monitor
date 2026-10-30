@@ -50,7 +50,7 @@ def test_four_text_order_day_breakdown_dates_and_source_times():
     assert 'NWS ABQ hourly forecast (Farmington) issued Fri 10/30 6:02 AM MDT' in text
     assert 'Thu 10/29 10:25 AM MDT' in text and 'Thu 10/29 8:56 AM MDT' in text
     assert 'Mon 11/2 4:00 PM MST' in text
-    assert 'total release 264 cfs' in text and 'Future Navajo release changes unverified' in text
+    assert 'total release 264 cfs' in text and 'Future release changes unverified' in text
 
 
 def test_full_catchment_average_cannot_hide_split_change():
@@ -68,8 +68,8 @@ def test_undefined_and_horizon_forecasts_never_become_confirmed_crests():
     ops['rivers']['lpfn5'].update(category='undefined', at_horizon=True)
     texts = build_messages(report(), ops, 'No material changes', NOW)
     assert 'max through' in texts[2]
-    assert 'stage category undefined' in texts[3]
-    assert 'stage category undefined' not in texts[2]
+    assert 'stage category undefined' in texts[2]
+    assert 'stage category undefined' not in texts[3]
 
 
 def test_unavailable_sources_stay_explicit():
@@ -79,7 +79,7 @@ def test_unavailable_sources_stay_explicit():
     assert 'La Plata/Farmington: unavailable' in text
 
 
-def test_discussion_alerts_and_explicit_nws_product_times_are_last():
+def test_river_forecasts_and_product_times_stay_with_cfs_weather_alerts_last():
     ops = operational()
     ops['rivers']['arfn5'].update(category='action', stage_ft=9.01)
     texts = build_messages(report(), ops, 'Material change — forecast increased: County increased 0.30in', NOW)
@@ -87,15 +87,18 @@ def test_discussion_alerts_and_explicit_nws_product_times_are_last():
     assert texts[1].startswith('SJC OEM | Snow')
     assert texts[2].startswith('SJC OEM | Rivers')
     assert texts[3].startswith('SJC OEM | Forecasts & alerts')
-    assert 'ACTION STAGE' in texts[3] and 'excessive-rain' in texts[3]
-    assert 'NWS river forecasts (' in texts[3]
+    assert 'ACTION STAGE' in texts[2] and 'excessive-rain' in texts[3]
+    assert 'ACTION STAGE' not in texts[3]
+    assert 'NWS river forecasts (' in texts[2]
+    assert 'NWS river forecasts (' not in texts[3]
     assert 'NWS ABQ hourly forecast (' in texts[3]
     assert 'WPC forecast increased since last sent' in texts[3]
     for text in texts[:3]:
-        assert 'ACTION STAGE' not in text
         assert 'excessive-rain risk' not in text
-        assert 'NWS river forecasts (' not in text
         assert 'WPC forecast increased' not in text
+    for text in texts[:2]:
+        assert 'ACTION STAGE' not in text
+        assert 'NWS river forecasts (' not in text
 
 
 def test_snow_text_is_explicit_when_no_mapped_snow():

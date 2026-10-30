@@ -159,7 +159,7 @@ def test_stage_labels_are_in_every_river_brief_even_if_unchanged():
                            ('moderate','MODERATE FLOOD STAGE'),('major','MAJOR FLOOD STAGE')]:
         current=forecast();current['rivers']['arfn5'].update(category=category,stage_ft=8.1)
         texts=build_messages(report(),current,'No material changes',NOW)
-        assert label in texts[3] and '8.10 ft' in texts[2]
-        assert label not in texts[2]
+        assert label in texts[2] and '8.10 ft' in texts[2]
+        assert label not in texts[3]
 
 

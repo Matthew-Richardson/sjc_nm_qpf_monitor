@@ -78,22 +78,6 @@ def weather_context(report, operational, now, reason=None):
         lines.append('WPC forecast ' + direction + ' since last sent.')
     elif reason and (reason.startswith('Returned to dry') or reason.startswith('Snow guidance')):
         lines.append(reason)
-    categories = defaultdict(list)
-    river_issues = defaultdict(list)
-    names = {'arfn5': 'Animas at Farmington', 'frmn5': 'San Juan at Farmington',
-             'shrn5': 'San Juan at Shiprock', 'lpfn5': 'La Plata near Farmington'}
-    labels = {'below action': 'below action', 'undefined': 'stage category undefined',
-              'action': 'ACTION STAGE', 'minor': 'MINOR FLOOD STAGE',
-              'moderate': 'MODERATE FLOOD STAGE', 'major': 'MAJOR FLOOD STAGE'}
-    for gauge, name in names.items():
-        row = operational.get('rivers', {}).get(gauge)
-        if row and not row.get('observed'):
-            categories[labels[row.get('category', 'undefined')]].append(name)
-            river_issues[row.get('issued')].append(name)
-    for label, gauges in categories.items():
-        lines.append('River forecast: ' + '; '.join(gauges) + ' — ' + label + '.')
-    for value, gauges in river_issues.items():
-        lines.append('NWS river forecasts (' + '; '.join(gauges) + ') issued ' + issued(value))
     active = [row for row in operational.get('outlooks', {}).values()
               if row.get('level', 0) > 0 and local(row['end']) > now]
     for row in active:
@@ -108,7 +92,6 @@ def weather_context(report, operational, now, reason=None):
         lines.append('NWS ABQ hourly forecast (' + '/'.join(towns) + ') issued ' + issued(value))
     if not grouped:
         lines.append('NWS ABQ hourly forecast unavailable.')
-    lines.append('Future Navajo release changes unverified.')
     if operational.get('errors'):
         lines.append('Some sources unavailable; see run log. Missing data do not mean lower risk.')
     return '\n'.join(lines)
@@ -152,6 +135,10 @@ def snow_core(report, now):
 
 def river_core(operational, now):
     lines = [now.strftime('SJC OEM | Rivers — %a %-m/%-d')]
+    products = defaultdict(list)
+    labels = {'below action': 'below action', 'undefined': 'stage category undefined',
+              'action': 'ACTION STAGE', 'minor': 'MINOR FLOOD STAGE',
+              'moderate': 'MODERATE FLOOD STAGE', 'major': 'MAJOR FLOOD STAGE'}
     for gauge, name in RIVERS.items():
         row = operational.get('rivers', {}).get(gauge)
         if not row:
@@ -159,11 +146,15 @@ def river_core(operational, now):
             continue
         time = local(row['time']).strftime('%a %-m/%-d %-I:%M %p %Z')
         stage = f" / {row['stage_ft']:.2f} ft" if row.get('stage_ft') is not None else ''
+        category = labels[row.get('category', 'undefined')]
         if row.get('observed'):
             lines.append(f"{name}: {row['cfs']:,} cfs{stage} observed {time}; no current NWS forecast.")
         else:
             kind = 'max through' if row.get('at_horizon') else 'peak'
-            lines.append(f"{name}: {row['cfs']:,} cfs{stage}, {kind} {time}.")
+            lines.append(f"{name}: {row['cfs']:,} cfs{stage}, {kind} {time}; {category}.")
+            products[row.get('issued')].append(name)
+    for value, gauges in products.items():
+        lines.append('NWS river forecasts (' + '; '.join(gauges) + ') issued ' + issued(value))
     return '\n'.join(lines)
 
 
@@ -185,8 +176,9 @@ def navajo_section(report, operational):
             storage += f" ({change:+,.0f}/day)"
         lines.append(storage + '.')
         lines.append('Daily report issuance time unavailable.')
+        lines.append('Future release changes unverified.')
     else:
-        lines.append('Daily operations unavailable.')
+        lines.append('Daily operations unavailable; future releases unverified.')
     return '\n'.join(lines)
 
 
