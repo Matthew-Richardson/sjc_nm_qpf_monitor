@@ -6,6 +6,7 @@ from groupme_notify import message_parts
 import groupme_notify
 import json
 from tests.test_groupme import report
+from sjc_brief import build_messages
 
 NOW=datetime(2026,10,19,18,tzinfo=timezone.utc)
 
@@ -97,7 +98,7 @@ def test_river_brief_labels_lemon_as_observed():
     current['rivers']['lpfn5']={'cfs':1020,'time':NOW.isoformat(),'category':'below action',
         'stage_ft':3.81,'issued':NOW.isoformat(),'at_horizon':False,'observed':True}
     text=groupme_notify.river_brief(current,[],NOW)
-    assert 'La Plata/Farmington: 1,020 cfs observed' in text
+    assert 'La Plata/Farmington: 1,020 cfs / 3.81 ft observed' in text
     assert 'no current NWS forecast' in text
 
 def test_failed_send_preserves_delivery_baseline(tmp_path,monkeypatch):
@@ -143,11 +144,13 @@ def test_wet_brief_sends_weather_then_rivers_as_separate_posts(tmp_path,monkeypa
     def send(*a,**k):posts.append(k['json']['text']);return Response()
     monkeypatch.setattr(groupme_notify.requests,'post',send)
     groupme_notify.main()
-    assert len(posts)==2
+    assert len(posts)==4
     assert posts[0].startswith('SJC OEM | Rain')
-    assert posts[1].startswith('SJC OEM | Rivers')
+    assert posts[1].startswith('SJC OEM | Snow')
+    assert posts[2].startswith('SJC OEM | Rivers')
+    assert posts[3].startswith('SJC OEM | Forecasts & alerts')
     assert 'Animas at Farmington' not in posts[0]
-    assert 'La Plata/Farmington' in posts[1] and 'state line' not in posts[1]
+    assert 'La Plata/Farmington' in posts[2] and 'state line' not in posts[2]
     assert all(len(t)<=1000 for t in posts)
     assert json.loads((tmp_path/'data/notification_state.json').read_text())['operational']['rivers']
 
@@ -155,7 +158,8 @@ def test_stage_labels_are_in_every_river_brief_even_if_unchanged():
     for category,label in [('action','ACTION STAGE'),('minor','MINOR FLOOD STAGE'),
                            ('moderate','MODERATE FLOOD STAGE'),('major','MAJOR FLOOD STAGE')]:
         current=forecast();current['rivers']['arfn5'].update(category=category,stage_ft=8.1)
-        text=groupme_notify.river_brief(current,[],NOW)
-        assert label in text and '8.10 ft' in text
+        texts=build_messages(report(),current,'No material changes',NOW)
+        assert label in texts[3] and '8.10 ft' in texts[2]
+        assert label not in texts[2]
 
 

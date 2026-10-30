@@ -36,9 +36,9 @@ def operational():
                                      'storage_af': 1143965, 'storage_change_af': 9254}}}
 
 
-def test_three_text_limit_day_breakdown_dates_and_source_times():
+def test_four_text_order_day_breakdown_dates_and_source_times():
     texts = build_messages(report(), operational(), 'No material changes', NOW)
-    assert 2 <= len(texts) <= 3
+    assert len(texts) == 4
     assert all(len(text) <= 1000 for text in texts)
     text = '\n'.join(texts)
     assert '7d | D1 | D2 | D3 | D4–5 | D6–7' in text
@@ -46,11 +46,11 @@ def test_three_text_limit_day_breakdown_dates_and_source_times():
     assert 'do not add' in text and 'Combined Animas' in text
     assert 'D2 10/31–11/1' in text and '5 AM MST after DST ends' in text
     assert 'WPC issued Fri 10/30 4:30 AM MDT' in text
-    assert 'ERO issued Fri 10/30 2:19 AM MDT' in text
-    assert 'NWS ABQ hourly (Farmington) issued Fri 10/30 6:02 AM MDT' in text
+    assert 'WPC excessive-rainfall outlook issued Fri 10/30 2:19 AM MDT' in text
+    assert 'NWS ABQ hourly forecast (Farmington) issued Fri 10/30 6:02 AM MDT' in text
     assert 'Thu 10/29 10:25 AM MDT' in text and 'Thu 10/29 8:56 AM MDT' in text
     assert 'Mon 11/2 4:00 PM MST' in text
-    assert 'total release 264 cfs' in text and 'Future release changes unverified' in text
+    assert 'total release 264 cfs' in text and 'Future Navajo release changes unverified' in text
 
 
 def test_full_catchment_average_cannot_hide_split_change():
@@ -66,8 +66,10 @@ def test_full_catchment_average_cannot_hide_split_change():
 def test_undefined_and_horizon_forecasts_never_become_confirmed_crests():
     ops = operational()
     ops['rivers']['lpfn5'].update(category='undefined', at_horizon=True)
-    text = river_core(ops, NOW)
-    assert 'stage category undefined' in text and 'max through' in text
+    texts = build_messages(report(), ops, 'No material changes', NOW)
+    assert 'max through' in texts[2]
+    assert 'stage category undefined' in texts[3]
+    assert 'stage category undefined' not in texts[2]
 
 
 def test_unavailable_sources_stay_explicit():
@@ -75,3 +77,43 @@ def test_unavailable_sources_stay_explicit():
     assert 'NWS ABQ hourly forecast unavailable' in text
     assert 'Daily operations unavailable' in text
     assert 'La Plata/Farmington: unavailable' in text
+
+
+def test_discussion_alerts_and_explicit_nws_product_times_are_last():
+    ops = operational()
+    ops['rivers']['arfn5'].update(category='action', stage_ft=9.01)
+    texts = build_messages(report(), ops, 'Material change — forecast increased: County increased 0.30in', NOW)
+    assert texts[0].startswith('SJC OEM | Rain')
+    assert texts[1].startswith('SJC OEM | Snow')
+    assert texts[2].startswith('SJC OEM | Rivers')
+    assert texts[3].startswith('SJC OEM | Forecasts & alerts')
+    assert 'ACTION STAGE' in texts[3] and 'excessive-rain' in texts[3]
+    assert 'NWS river forecasts (' in texts[3]
+    assert 'NWS ABQ hourly forecast (' in texts[3]
+    assert 'WPC forecast increased since last sent' in texts[3]
+    for text in texts[:3]:
+        assert 'ACTION STAGE' not in text
+        assert 'excessive-rain risk' not in text
+        assert 'NWS river forecasts (' not in text
+        assert 'WPC forecast increased' not in text
+
+
+def test_snow_text_is_explicit_when_no_mapped_snow():
+    r = report()
+    r['snow'] = {'active': False, 'periods': {'Day 1': [], 'Day 2': [], 'Day 3': []}}
+    snow = build_messages(r, operational(), 'No material changes', NOW)[1]
+    assert 'no mapped 10%+ chance of 4"+' in snow
+    assert 'Lighter snow remains possible' in snow
+    assert 'upstream Colorado mountain snow is not assessed' in snow
+
+
+def test_active_snow_probabilities_and_source_time_are_second():
+    r = report()
+    row = {'threshold_in': 4, 'minimum_probability_pct': 40}
+    r['snow'] = {'active': True, 'periods': {'Day 1': [row]},
+                 'elevation_bands': {'Day 1': {'Above 9,000 ft': [row]}},
+                 'issued_by_day': {'Day 1': ['2026-10-30 08:00:00']}}
+    texts = build_messages(r, operational(), 'Snow guidance increased', NOW)
+    assert 'Day 1, Above 9,000 ft: 40–69% for 4+"' in texts[1]
+    assert 'WPC snow (Day 1) issued Fri 10/30 2:00 AM MDT' in texts[1]
+    assert 'Snow guidance increased' in texts[3]

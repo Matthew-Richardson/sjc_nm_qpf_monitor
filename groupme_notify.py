@@ -233,7 +233,7 @@ def message(report,reason):
     return "\n".join(lines)
 
 def weather_brief(report,operational,reason,changes,now):
-    return rain_core(report,reason,now)+"\n"+weather_context(report,operational,now)
+    return rain_core(report,reason,now)+"\n"+weather_context(report,operational,now,reason)
 
 def river_brief(operational,changes,now):
     return river_core(operational,now)
@@ -273,7 +273,7 @@ def main():
     if reason:
         bot=os.environ.get("GROUPME_BOT_ID")
         if not bot: raise RuntimeError("Missing GROUPME_BOT_ID Actions secret")
-        # Composition already enforces at most three texts, each <=1,000 characters.
+        # Composition already enforces at most four texts, each <=1,000 characters.
         for text in texts:
             response=requests.post("https://api.groupme.com/v3/bots/post",
                                    json={"bot_id":bot,"text":text},timeout=30)

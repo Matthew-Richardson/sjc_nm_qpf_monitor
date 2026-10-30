@@ -37,7 +37,7 @@ Manual run: **Actions → San Juan NM WPC QPF → Run workflow**. Code pushes va
 
 ## SJC OEM briefing format
 
-Delivery uses **two concise messages normally, three maximum**, each within GroupMe's 1,000-character limit. Larger briefings place local outlook details in a third message. Every used forecast includes its source issuance time; missing issuance times are labeled unavailable. Each river forecast retains its own issuance time, including when gauges have different cycles. USBR daily observations carry the observation date and are never described as a future release schedule.
+Delivery uses **four concise messages**, each within GroupMe's 1,000-character limit, in this order: **rain totals; snow; river/Navajo numbers; forecast discussion and alerts**. Snow always follows the rain text, including an explicit no-mapped-snow or unavailable-data statement. Snow guidance covers SJC only; upstream Colorado mountain snowfall is not assessed by this county snow analysis. NWS river forecast issuance groups name the rivers and gauges explicitly in the fourth text. NWS Albuquerque hourly forecast timestamps, excessive-rainfall outlooks, river action/flood categories, forecast changes and release-schedule uncertainty also appear in the fourth text. River heights, flow peaks, peak times and Navajo daily measurements stay in the third text. Every used forecast includes its source issuance time; missing issuance times are labeled unavailable. Each river forecast retains its own issuance time, including when gauges have different cycles. USBR daily observations carry the observation date and are never described as a future release schedule.
 
 Rain messages show **7-day | Day 1 | Day 2 | Day 3 | Days 4–5 | Days 6–7** precipitation averages, with actual forecast-period dates and Mountain Time/DST labels. Periods are not calendar days. Independently mapped WPC period totals may not sum exactly to the mapped seven-day total.
 
@@ -55,14 +55,14 @@ USBR Navajo daily storage, computed inflow, total release and change in storage 
 ## Notification rules
 
 - Wet: seven-day county average ≥0.50 inches, any gauge-catchment average ≥1.00 inch, or mapped ≥10% chance of ≥4 inches of snow in Days 1–3.
-- Wet periods: weather first, separate river text second, morning and evening even when unchanged. Unchanged duplicate runs in the same slot are suppressed.
+- Wet periods: rain first, snow second, river/Navajo numbers third, forecast discussion and alerts fourth, morning and evening even when unchanged. Unchanged duplicate runs in the same slot are suppressed.
 - Material WPC change: county/catchment average changes ≥0.25 inches versus last delivered values, labeled increased/decreased/mixed. Snow probability/elevation changes also trigger updates.
 - Dry: county <0.25 inches, every gauge and divided catchment <0.50 inches, and no mapped snow signal on two consecutive successful runs. Routine messages then pause.
 - River triggers: ≥20% and 100 cfs change, stage-category crossing, or peak-time shift ≥6 hours for flows ≥500 cfs. NWS timing uses sustained ≥50% hourly precipitation chance and ≥6-hour shifts.
 - Quiet hours: **9 PM–6 AM Mountain**, including forced manual runs. Forecasts can refresh, but delivery baselines remain unchanged.
 - Delivery state advances after successful delivery. Unavailable sources preserve prior values; partial sends can repeat on retry. River guidance older than 36 hours and hourly forecasts older than 24 hours are excluded; observations must be within six hours.
 
-Messages use SJC OEM headings, plain text, local dates/times and issuance timestamps. Composition enforces a maximum of three texts without silently truncating a forecast; if a briefing cannot fit, delivery fails and the previous delivery baseline is preserved. Forecast liquid precipitation is not observed rain, flood probability, or a routed river forecast.
+Messages use SJC OEM headings, plain text, local dates/times and issuance timestamps. Composition enforces a maximum of four texts without silently truncating a forecast; if a briefing cannot fit, delivery fails and the previous delivery baseline is preserved. Forecast liquid precipitation is not observed rain, flood probability, or a routed river forecast.
 
 ## Local validation
 
