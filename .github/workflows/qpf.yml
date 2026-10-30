@@ -7,6 +7,9 @@ on:
     branches: [main]
     paths:
       - 'qpf_monitor.py'
+      - 'divided_catchments.py'
+      - 'navajo_monitor.py'
+      - 'sjc_brief.py'
       - 'nbm_monitor.py'
       - 'groupme_notify.py'
       - 'operational_monitor.py'
@@ -69,6 +72,9 @@ jobs:
             git pull --rebase origin main
             git push
           fi
+      - name: Preview updated briefing without sending
+        if: ${{ github.event_name == 'push' && github.event.head_commit.message != 'Trigger scheduled QPF check' }}
+        run: python groupme_notify.py --preview --force
       - name: Notify GroupMe on rainfall, river, flood or timing changes
         if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.event.head_commit.message == 'Trigger scheduled QPF check') }}
         env:
@@ -93,6 +99,7 @@ jobs:
         with:
           name: qpf-output
           path: data/
+
 
 
 

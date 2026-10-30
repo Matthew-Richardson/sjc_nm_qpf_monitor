@@ -54,9 +54,9 @@ def elevation_rows(polygons,grid):
 
 def analyze(geom,query=features,elevation=elevation_grid):
     bbox=",".join(str(n) for n in geom.bounds)
-    periods={}; polygons_by_day={}
+    periods={}; polygons_by_day={}; issues_by_day={}
     for day,layers in LAYERS.items():
-        observations=[]; polygons=[]
+        observations=[]; polygons=[]; issues=set()
         for inches,layer in layers.items():
             fs=query(f"{SNOW}/{layer}",{
                 "where":"1=1","outFields":"outlook,issue_time,start_time,end_time",
@@ -69,9 +69,12 @@ def analyze(geom,query=features,elevation=elevation_grid):
                 category=ft["properties"].get("outlook")
                 if category not in PROBS: raise ValueError(f"Unexpected NOAA snow probability class: {category!r}")
                 row={"threshold_in":inches,"category":category,"minimum_probability_pct":PROBS[category]}
+                if ft["properties"].get("issue_time"):
+                    issues.add(str(ft["properties"]["issue_time"]))
                 observations.append(row); polygons.append((g,row))
         periods[day]=sorted(observations,key=lambda r:(r["threshold_in"],r["minimum_probability_pct"]),reverse=True)
         polygons_by_day[day]=polygons
+        issues_by_day[day]=sorted(issues)
     active=any(periods.values())
     bands={}
     if active:
@@ -79,7 +82,7 @@ def analyze(geom,query=features,elevation=elevation_grid):
         bands={day:elevation_rows(polygons,grid) for day,polygons in polygons_by_day.items()}
     return {"source":SNOW,"elevation_source":ELEVATION,
             "scope":"WPC probability polygons summarized by USGS 3DEP elevation band within San Juan County, New Mexico",
-            "periods":periods,"elevation_bands":bands,"active":active}
+            "periods":periods,"issued_by_day":issues_by_day,"elevation_bands":bands,"active":active}
 
 def main():
     file=Path("data/latest.json"); report=json.loads(file.read_text())

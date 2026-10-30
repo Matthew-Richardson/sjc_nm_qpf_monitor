@@ -10,6 +10,7 @@ from shapely import transform
 from shapely.ops import unary_union
 from pyproj import Transformer
 from nbm_monitor import calculate as calculate_nbm
+from divided_catchments import geometries as divided_geometries, SCHEMA
 
 WPC="https://mapservices.weather.noaa.gov/vector/rest/services/precip/wpc_qpf/MapServer"
 COUNTY="https://tigerweb.geo.census.gov/arcgis/rest/services/TIGERweb/State_County/MapServer/27"
@@ -176,6 +177,8 @@ def run():
         print("Optional HUC10 watershed detail unavailable:",exc)
     print("Loading five USGS upstream gauge catchments...",flush=True)
     catchments=gauge_catchment_geometries()
+    print("Delineating divided Animas and Navajo/downstream catchments...",flush=True)
+    divided=divided_geometries(catchments,fetch,NLDI,PROJECT)
     from shapely.ops import unary_union as union
     extent=union([geom]+[b["geometry"] for b in basins.values()]+[b["geometry"] for b in fine_basins.values()]+[b["geometry"] for b in catchments.values()])
     xmin,ymin,xmax,ymax=extent.bounds
@@ -196,6 +199,8 @@ def run():
             fine_output[code]["periods"][label]=summarize(basin["geometry"],f)
         for site,catchment in catchments.items():
             catchment_output[site]["periods"][label]=summarize(catchment["geometry"],f)
+        for region in divided.values():
+            region["periods"][label]=summarize(region["geometry"],f)
         if not output[label]["issue_time"]:
             # Metadata query establishes product issuance even if no mapped polygon reaches the county.
             doc=fetch(f"{WPC}/{layer}/query",{"f":"json","where":"1=1",
@@ -209,12 +214,15 @@ def run():
     nbm_regions={"county":geom}
     nbm_regions.update({site:catchment["geometry"] for site,catchment in catchments.items()})
     print("WPC calculations complete. Starting separate 168-hour NBM comparison...",flush=True)
+    nbm_regions.update({"split_"+key:row["geometry"] for key,row in divided.items()})
     try:
         nbm=calculate_nbm(nbm_regions)
     except Exception as exc:
         nbm={"status":"unavailable","source":"https://noaa-nbm-grib2-pds.s3.amazonaws.com","error":str(exc)}
         print("NBM comparison unavailable:",exc)
-    report={"area_schema":"san-juan-nm-gauge-catchments-v1","gauge_catchments":catchment_output,"gauge_catchment_source":NLDI,
+    report={"area_schema":SCHEMA,
+            "divided_catchments":{key:{k:v for k,v in row.items() if k!="geometry"} for key,row in divided.items()},
+            "divided_catchment_note":"Geographic polygon differences, not subtraction of precipitation averages. Navajo uses the NLDI dam outlet flowline COMID 17040463. Independent NLDI boundaries may differ slightly from published drainage areas.","gauge_catchments":catchment_output,"gauge_catchment_source":NLDI,
             "optional_watershed_status":"unavailable" if watershed_errors else "available",
             "optional_watershed_errors":watershed_errors,
             "huc10_watersheds":fine_output,"huc10_source":WATERSHEDS10,"watersheds":watershed_output,"watershed_source":WATERSHEDS,"watershed_level":"USGS HUC8 full subbasins intersecting San Juan County, New Mexico",
@@ -225,6 +233,13 @@ def run():
     lines=["# San Juan County, New Mexico WPC QPF","",f"Generated UTC: {report['generated_utc']}","","| Period | Avg (in) | Min (in) | Max (in) | Coverage | WPC issue |","|---|---:|---:|---:|---:|---|"]
     for label,p in output.items():
         lines.append(f"| {label} | {p['average_in']:.2f} | {p['min_in']:.2f} | {p['max_in']:.2f} | {p['coverage_pct']:.1f}% | {p['issue_time']} |")
+    lines.extend(["", "## Divided catchment precipitation (inches)", "",
+        "Separate drainage-area averages; do not add. Forecast periods are not midnight-to-midnight days.",
+        "| Drainage area | Area (sq mi) | Day 1 | Day 2 | Day 3 | Days 4–5 | Days 6–7 | Days 1–7 |",
+        "|---|---:|---:|---:|---:|---:|---:|---:|"])
+    for row in divided.values():
+        lines.append("| "+row["name"]+f" | {row['area_sq_mi']:.1f} | "+" | ".join(f"{row['periods'][label]['average_in']:.2f}" for label in LAYERS)+" |")
+    lines.extend(["",report["divided_catchment_note"]])
     lines.extend(["", "## Gauge-upstream catchment QPF", "",
         "USGS NLDI basin delineations upstream of the monitored streamgages.", "",
         "| Gauge catchment | USGS site | Days 1–7 avg (in) | Min (in) | Max (in) | Coverage |",
@@ -269,6 +284,7 @@ def run():
     if nbm.get("status")=="complete":
         lines.extend([f"Cycle UTC: {nbm['cycle_utc']}", "", "| Area | NBM avg (in) | Grid points |", "|---|---:|---:|"])
         names={"county":"San Juan County, New Mexico",**{site:row["name"] for site,row in GAUGE_CATCHMENTS.items()}}
+        names.update({"split_"+key:row["name"] for key,row in divided.items()})
         for code,row in nbm["totals"].items():
             lines.append(f"| {names.get(code,code)} | {row['average_in']:.2f} | {row['grid_points']} |")
     else:
@@ -279,5 +295,6 @@ def run():
     Path("data/latest.md").write_text("\n".join(lines)+"\n")
     print("\n".join(lines))
 if __name__=="__main__": run()
+
 
 

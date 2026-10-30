@@ -5,6 +5,7 @@ from pathlib import Path
 from zoneinfo import ZoneInfo
 import requests
 from operational_monitor import collect, compare, delivered_baseline, RIVERS, LEVELS, stamp, dt
+from sjc_brief import build_messages, rain_core, weather_context, river_core
 
 WATCHED={"San Juan Farmington":"09365000","San Juan Shiprock":"09368000","La Plata":"09367500","Animas Farmington":"09364500","Animas Aztec":"09364010"}
 EASTERN=()
@@ -48,7 +49,9 @@ def snow_elevation_summary(snow):
 
 def totals(r):
     return {"county":r["periods"]["Days 1-7"]["average_in"],
-            **{name:r["gauge_catchments"][site]["periods"]["Days 1-7"]["average_in"] for name,site in WATCHED.items()}}
+            **{name:r["gauge_catchments"][site]["periods"]["Days 1-7"]["average_in"] for name,site in WATCHED.items()},
+            **{row["name"]:row["periods"]["Days 1-7"]["average_in"]
+               for row in r.get("divided_catchments",{}).values()}}
 
 def wet_slot(now):
     return now.date().isoformat()+(" AM" if now.hour<12 else " PM")
@@ -62,8 +65,8 @@ def decide(report,state,force=False,now=None):
     snow=report.get("snow",{})
     snow_signature=snow_summary(snow)
     snow_active=bool(snow_signature)
-    wet=t["county"]>=0.50 or any(t[n]>=1.00 for n in WATCHED) or snow_active
-    dry=t["county"]<0.25 and all(t[n]<0.50 for n in WATCHED) and not snow_active
+    wet=t["county"]>=0.50 or any(value>=1.00 for name,value in t.items() if name!="county") or snow_active
+    dry=t["county"]<0.25 and all(value<0.50 for name,value in t.items() if name!="county") and not snow_active
     streak=(state.get("dry_streak",0)+1) if dry else 0
     previous=state.get("status","dry")
     status="wet" if wet else ("dry" if previous=="wet" and streak>=2 else previous)
@@ -230,50 +233,10 @@ def message(report,reason):
     return "\n".join(lines)
 
 def weather_brief(report,operational,reason,changes,now):
-    text=message(report,reason)
-    def source_time(value):
-        if isinstance(value,(int,float)):
-            value=datetime.fromtimestamp(value/(1000 if value>1e11 else 1),timezone.utc)
-        else:
-            value=datetime.fromisoformat(str(value).replace("Z","+00:00"))
-            if value.tzinfo is None: value=value.replace(tzinfo=timezone.utc)
-        return value.astimezone(ZoneInfo("America/Denver")).strftime("%a %-m/%-d, %-I:%M %p %Z")
-    items=[]
-    wpc=report.get("periods",{}).get("Days 1-7",{}).get("issue_time")
-    if wpc: items.append("WPC "+source_time(wpc))
-    nbm=report.get("nbm",{})
-    if nbm.get("status")=="complete": items.append("NBM "+source_time(nbm["cycle_utc"]))
-    nws=[row.get("issued") for row in operational.get("timing",{}).values() if row.get("issued")]
-    if nws: items.append("NWS ABQ "+source_time(max(nws,key=lambda value:dt(value))))
-    return text+("\nIssued | "+" | ".join(items) if items else "")
+    return rain_core(report,reason,now)+"\n"+weather_context(report,operational,now)
 
 def river_brief(operational,changes,now):
-    lines=[now.strftime('SJC NM river forecast peaks | %a %-m/%-d')]
-    for gauge,name in RIVERS.items():
-        v=operational.get('rivers',{}).get(gauge)
-        if not v:
-            lines.append(name+': unavailable')
-            continue
-        labels={'action':'ACTION STAGE','minor':'MINOR FLOOD STAGE','moderate':'MODERATE FLOOD STAGE',
-                'major':'MAJOR FLOOD STAGE','below action':'below action stage'}
-        category=v['category']
-        suffix=' — '+labels[category] if category in labels else ''
-        if category in ('action','minor','moderate','major') and v.get('stage_ft') is not None:
-            suffix=f" / {v['stage_ft']:.2f} ft"+suffix
-        if v.get('observed'):
-            if v.get('stage_ft') is not None and category not in ('action','minor','moderate','major'):
-                suffix=f" / {v['stage_ft']:.2f} ft"+suffix
-            time=dt(v['time']).astimezone(ZoneInfo('America/Denver')).strftime('%a %-m/%-d, %-I:%M %p')
-            lines.append(f"{name}: {v['cfs']:,} cfs observed {time}{suffix}; no current NWS forecast")
-            continue
-        label='max through ' if v['at_horizon'] else ''
-        time=dt(v['time']).astimezone(ZoneInfo('America/Denver')).strftime('%a %-m/%-d, %-I %p')
-        lines.append(f"{name}: {v['cfs']:,} cfs {label}{time}{suffix}")
-    values=[v for v in operational.get('rivers',{}).values() if not v.get('observed')]
-    if values:
-        issued=max(dt(v['issued']) for v in values).astimezone(ZoneInfo('America/Denver'))
-        lines.append(issued.strftime('NWS forecast issued %a %-m/%-d, %-I:%M %p %Z. All times %Z.'))
-    return '\n'.join(lines)
+    return river_core(operational,now)
 
 def main():
     parser=argparse.ArgumentParser()
@@ -298,9 +261,8 @@ def main():
         new_state["last_sent_at"]=now.isoformat()
     texts=[]
     if reason:
-        texts=[weather_brief(report,operational,reason,changes,now)]
-        if new_state.get('status')=='wet' or changes:
-            texts.append(river_brief(operational,changes,now))
+        texts=build_messages(report,operational,reason,now,
+                             include_rivers=new_state.get('status')=='wet' or bool(changes))
         new_state["operational"]=delivered_baseline(operational,state.get("operational",{}))
         if new_state.get('status')=='wet':
             new_state['wet_update_slot']=wet_slot(now)
@@ -311,13 +273,12 @@ def main():
     if reason:
         bot=os.environ.get("GROUPME_BOT_ID")
         if not bot: raise RuntimeError("Missing GROUPME_BOT_ID Actions secret")
-        # GroupMe bot messages have a 1,000-character limit. Preserve whole lines.
+        # Composition already enforces at most three texts, each <=1,000 characters.
         for text in texts:
-            for part in message_parts(text):
-                response=requests.post("https://api.groupme.com/v3/bots/post",
-                                       json={"bot_id":bot,"text":part},timeout=30)
-                response.raise_for_status()
-                print("GroupMe HTTP",response.status_code,reason)
+            response=requests.post("https://api.groupme.com/v3/bots/post",
+                                   json={"bot_id":bot,"text":text},timeout=30)
+            response.raise_for_status()
+            print("GroupMe HTTP",response.status_code,reason)
     else: print("Quiet: no update required.")
     state_path.parent.mkdir(parents=True,exist_ok=True)
     state_path.write_text(json.dumps(new_state,indent=2)+"\n")
@@ -335,4 +296,5 @@ def message_parts(text,limit=950):
     if current: parts.append(current)
     return parts
 if __name__=="__main__": main()
+
 

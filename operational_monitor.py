@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 import requests
+from navajo_monitor import collect as collect_navajo
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from shapely.geometry import shape
@@ -147,9 +148,10 @@ def outlook(day, boundary, now):
 
 def collect(now=None):
     now = (now or datetime.now(timezone.utc)).astimezone(timezone.utc)
-    result = {"rivers": {}, "outlooks": {}, "timing": {}, "errors": [], "checked": now.isoformat()}
+    result = {"rivers": {}, "outlooks": {}, "timing": {}, "reservoirs": {}, "errors": [], "checked": now.isoformat()}
     jobs = {}
     with ThreadPoolExecutor(max_workers=10) as pool:
+        jobs[pool.submit(collect_navajo, now)] = ("reservoirs", "navajo")
         for gauge in RIVERS:
             jobs[pool.submit(river, gauge, now)] = ("rivers", gauge)
         for town in TOWNS:
@@ -225,7 +227,7 @@ def compare(current, previous, now):
 
 def delivered_baseline(current, previous):
     return {source: {**previous.get(source, {}), **current.get(source, {})}
-            for source in ("rivers", "outlooks", "timing")}
+            for source in ("rivers", "outlooks", "timing", "reservoirs")}
 
 def message_lines(current, changes):
     lines = ["SJC NM weather | River / flood / timing update", *changes]
@@ -248,5 +250,6 @@ def message_lines(current, changes):
     if current.get("errors"):
         lines.append("Some official data unavailable; prior risk retained. See run log.")
     return lines
+
 
 

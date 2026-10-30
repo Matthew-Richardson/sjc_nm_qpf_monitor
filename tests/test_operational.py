@@ -29,6 +29,11 @@ def test_unavailable_does_not_clear_river_baseline():
     assert not compare(new,old,NOW)
     assert delivered_baseline(new,old)['rivers']==old['rivers']
 
+
+def test_unavailable_navajo_preserves_prior_delivery_baseline():
+    old = {'reservoirs': {'navajo': {'date': '2026-10-29', 'release_cfs': 264}}}
+    assert delivered_baseline({'reservoirs': {}}, old)['reservoirs'] == old['reservoirs']
+
 def test_ero_rollover_does_not_alert_and_downgrade_does():
     v={'level':2,'start':'2026-10-21T12:00:00Z','end':'2026-10-22T12:00:00Z'}
     old={'outlooks':{v['end']:v}}
@@ -92,7 +97,7 @@ def test_river_brief_labels_lemon_as_observed():
     current['rivers']['lpfn5']={'cfs':1020,'time':NOW.isoformat(),'category':'below action',
         'stage_ft':3.81,'issued':NOW.isoformat(),'at_horizon':False,'observed':True}
     text=groupme_notify.river_brief(current,[],NOW)
-    assert 'La Plata at Farmington: 1,020 cfs observed' in text
+    assert 'La Plata/Farmington: 1,020 cfs observed' in text
     assert 'no current NWS forecast' in text
 
 def test_failed_send_preserves_delivery_baseline(tmp_path,monkeypatch):
@@ -139,10 +144,10 @@ def test_wet_brief_sends_weather_then_rivers_as_separate_posts(tmp_path,monkeypa
     monkeypatch.setattr(groupme_notify.requests,'post',send)
     groupme_notify.main()
     assert len(posts)==2
-    assert posts[0].startswith('SJC NM precipitation |')
-    assert posts[1].startswith('SJC NM river forecast peaks |')
+    assert posts[0].startswith('SJC OEM | Rain')
+    assert posts[1].startswith('SJC OEM | Rivers')
     assert 'Animas at Farmington' not in posts[0]
-    assert 'Animas below Aztec' in posts[1] and 'state line' not in posts[1]
+    assert 'La Plata/Farmington' in posts[1] and 'state line' not in posts[1]
     assert all(len(t)<=1000 for t in posts)
     assert json.loads((tmp_path/'data/notification_state.json').read_text())['operational']['rivers']
 
@@ -152,4 +157,5 @@ def test_stage_labels_are_in_every_river_brief_even_if_unchanged():
         current=forecast();current['rivers']['arfn5'].update(category=category,stage_ft=8.1)
         text=groupme_notify.river_brief(current,[],NOW)
         assert label in text and '8.10 ft' in text
+
 
