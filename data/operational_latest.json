@@ -1,47 +1,47 @@
 {
   "rivers": {
     "arfn5": {
-      "cfs": 5800,
+      "cfs": 5980,
       "time": "2026-11-02T23:00:00Z",
-      "category": "below action",
-      "stage_ft": 8.92,
-      "issued": "2026-10-29T16:25:00Z",
+      "category": "action",
+      "stage_ft": 9.01,
+      "issued": "2026-10-30T15:48:00Z",
       "at_horizon": false,
       "observed": false
     },
     "frmn5": {
-      "cfs": 7240,
+      "cfs": 7790,
       "time": "2026-11-03T00:00:00Z",
       "category": "below action",
-      "stage_ft": 6.43,
-      "issued": "2026-10-29T16:25:00Z",
+      "stage_ft": 6.69,
+      "issued": "2026-10-30T15:48:00Z",
       "at_horizon": false,
       "observed": false
     },
     "shrn5": {
-      "cfs": 8220,
-      "time": "2026-11-03T06:00:00Z",
-      "category": "below action",
-      "stage_ft": 12.97,
-      "issued": "2026-10-29T14:56:00Z",
+      "cfs": 10000,
+      "time": "2026-11-03T08:00:00Z",
+      "category": "action",
+      "stage_ft": 13.99,
+      "issued": "2026-10-30T15:48:00Z",
       "at_horizon": false,
       "observed": false
     },
     "azrn5": {
-      "cfs": 3140,
-      "time": "2026-10-30T14:15:00Z",
+      "cfs": 3150,
+      "time": "2026-10-30T15:15:00Z",
       "category": "undefined",
-      "stage_ft": 9.22,
-      "issued": "2026-10-30T14:15:00Z",
+      "stage_ft": 9.23,
+      "issued": "2026-10-30T15:15:00Z",
       "at_horizon": false,
       "observed": true
     },
     "lpfn5": {
-      "cfs": 1010,
-      "time": "2026-11-03T00:00:00Z",
+      "cfs": 1140,
+      "time": "2026-11-02T23:00:00Z",
       "category": "undefined",
-      "stage_ft": 8.96,
-      "issued": "2026-10-29T14:56:00Z",
+      "stage_ft": 9.46,
+      "issued": "2026-10-30T15:48:00Z",
       "at_horizon": false,
       "observed": false
     }
@@ -49,9 +49,9 @@
   "outlooks": {
     "2026-10-31T12:00:00+00:00": {
       "level": 1,
-      "start": "2026-10-30T12:00:00Z",
+      "start": "2026-10-30T16:00:00Z",
       "end": "2026-10-31T12:00:00Z",
-      "issued": "2026-10-30T08:28:00+00:00"
+      "issued": "2026-10-30T15:56:00+00:00"
     },
     "2026-11-01T12:00:00+00:00": {
       "level": 0,
@@ -112,6 +112,20 @@
       "issued": "2026-10-30T12:02:06+00:00"
     }
   },
+  "reservoirs": {
+    "navajo": {
+      "elevation_ft": 6047.63,
+      "storage_af": 1143965.0,
+      "inflow_cfs": 4949.0,
+      "release_cfs": 264.0,
+      "date": "2026-10-29",
+      "source": "https://www.usbr.gov/rsvrWater/rsv40Day.html?reservoirtype=Reservoir&siteid=920",
+      "storage_change_af": 9254.0,
+      "issued": null,
+      "future_release_verified": false,
+      "note": "Daily average total release and computed inflow; not instantaneous flow or a future release schedule."
+    }
+  },
   "errors": [],
-  "checked": "2026-10-30T15:10:11.270733+00:00"
+  "checked": "2026-10-30T16:23:16.358291+00:00"
 }
