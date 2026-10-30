@@ -1,5 +1,398 @@
 {
-  "area_schema": "san-juan-nm-gauge-catchments-v1",
+  "area_schema": "sjc-divided-catchments-v1",
+  "divided_catchments": {
+    "animas_upper": {
+      "name": "Animas above Durango",
+      "area_sq_mi": 679.7,
+      "periods": {
+        "Day 1": {
+          "average_in": 0.447,
+          "min_in": 0.1,
+          "max_in": 0.75,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:03:49",
+          "valid_period": [
+            "2026-10-30 12:00:00",
+            "2026-10-31 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Day 2": {
+          "average_in": 0.061,
+          "min_in": 0.01,
+          "max_in": 0.1,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:05:18",
+          "valid_period": [
+            "2026-10-31 12:00:00",
+            "2026-11-01 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Day 3": {
+          "average_in": 2.102,
+          "min_in": 1.25,
+          "max_in": 3.0,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:07:03",
+          "valid_period": [
+            "2026-11-01 12:00:00",
+            "2026-11-02 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Days 4-5": {
+          "average_in": 0.096,
+          "min_in": 0.01,
+          "max_in": 0.25,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 03:50:01",
+          "valid_period": [
+            "2026-11-02 12:00:00",
+            "2026-11-04 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Days 6-7": {
+          "average_in": 0.01,
+          "min_in": 0.0,
+          "max_in": 0.01,
+          "coverage_pct": 96.62,
+          "issue_time": "2026-10-30 03:50:01",
+          "valid_period": [
+            "2026-11-04 12:00:00",
+            "2026-11-06 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Days 1-7": {
+          "average_in": 2.892,
+          "min_in": 1.75,
+          "max_in": 4.0,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:30:11",
+          "valid_period": [
+            "2026-10-30 12:00:00",
+            "2026-11-06 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        }
+      }
+    },
+    "animas_lower": {
+      "name": "Animas Durango\u2013Farmington only",
+      "area_sq_mi": 667.2,
+      "periods": {
+        "Day 1": {
+          "average_in": 0.352,
+          "min_in": 0.1,
+          "max_in": 0.75,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:03:49",
+          "valid_period": [
+            "2026-10-30 12:00:00",
+            "2026-10-31 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Day 2": {
+          "average_in": 0.047,
+          "min_in": 0.01,
+          "max_in": 0.1,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:05:18",
+          "valid_period": [
+            "2026-10-31 12:00:00",
+            "2026-11-01 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Day 3": {
+          "average_in": 1.858,
+          "min_in": 0.75,
+          "max_in": 3.0,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:07:03",
+          "valid_period": [
+            "2026-11-01 12:00:00",
+            "2026-11-02 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Days 4-5": {
+          "average_in": 0.017,
+          "min_in": 0.0,
+          "max_in": 0.25,
+          "coverage_pct": 69.51,
+          "issue_time": "2026-10-30 03:50:01",
+          "valid_period": [
+            "2026-11-02 12:00:00",
+            "2026-11-04 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Days 6-7": {
+          "average_in": 0.002,
+          "min_in": 0.0,
+          "max_in": 0.01,
+          "coverage_pct": 18.99,
+          "issue_time": "2026-10-30 03:50:01",
+          "valid_period": [
+            "2026-11-04 12:00:00",
+            "2026-11-06 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Days 1-7": {
+          "average_in": 2.381,
+          "min_in": 1.0,
+          "max_in": 4.0,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:30:11",
+          "valid_period": [
+            "2026-10-30 12:00:00",
+            "2026-11-06 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        }
+      }
+    },
+    "navajo": {
+      "name": "Navajo upstream basin",
+      "area_sq_mi": 3212.4,
+      "periods": {
+        "Day 1": {
+          "average_in": 0.256,
+          "min_in": 0.1,
+          "max_in": 0.75,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:03:49",
+          "valid_period": [
+            "2026-10-30 12:00:00",
+            "2026-10-31 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Day 2": {
+          "average_in": 0.049,
+          "min_in": 0.01,
+          "max_in": 0.25,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:05:18",
+          "valid_period": [
+            "2026-10-31 12:00:00",
+            "2026-11-01 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Day 3": {
+          "average_in": 2.061,
+          "min_in": 1.0,
+          "max_in": 3.0,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:07:03",
+          "valid_period": [
+            "2026-11-01 12:00:00",
+            "2026-11-02 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Days 4-5": {
+          "average_in": 0.052,
+          "min_in": 0.01,
+          "max_in": 0.1,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 03:50:01",
+          "valid_period": [
+            "2026-11-02 12:00:00",
+            "2026-11-04 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Days 6-7": {
+          "average_in": 0.008,
+          "min_in": 0.0,
+          "max_in": 0.1,
+          "coverage_pct": 54.64,
+          "issue_time": "2026-10-30 03:50:01",
+          "valid_period": [
+            "2026-11-04 12:00:00",
+            "2026-11-06 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Days 1-7": {
+          "average_in": 2.55,
+          "min_in": 1.5,
+          "max_in": 4.0,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:30:11",
+          "valid_period": [
+            "2026-10-30 12:00:00",
+            "2026-11-06 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        }
+      }
+    },
+    "san_juan_local": {
+      "name": "Navajo\u2013Farmington excluding Animas",
+      "area_sq_mi": 2594.0,
+      "periods": {
+        "Day 1": {
+          "average_in": 0.156,
+          "min_in": 0.1,
+          "max_in": 0.5,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:03:49",
+          "valid_period": [
+            "2026-10-30 12:00:00",
+            "2026-10-31 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Day 2": {
+          "average_in": 0.01,
+          "min_in": 0.01,
+          "max_in": 0.25,
+          "coverage_pct": 99.99,
+          "issue_time": "2026-10-30 10:05:18",
+          "valid_period": [
+            "2026-10-31 12:00:00",
+            "2026-11-01 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Day 3": {
+          "average_in": 0.907,
+          "min_in": 0.5,
+          "max_in": 2.5,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:07:03",
+          "valid_period": [
+            "2026-11-01 12:00:00",
+            "2026-11-02 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Days 4-5": {
+          "average_in": 0.006,
+          "min_in": 0.0,
+          "max_in": 0.1,
+          "coverage_pct": 56.87,
+          "issue_time": "2026-10-30 03:50:01",
+          "valid_period": [
+            "2026-11-02 12:00:00",
+            "2026-11-04 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Days 6-7": {
+          "average_in": 0.0,
+          "min_in": 0.0,
+          "max_in": 0.01,
+          "coverage_pct": 0.01,
+          "issue_time": "2026-10-30 03:50:01",
+          "valid_period": [
+            "2026-11-04 12:00:00",
+            "2026-11-06 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Days 1-7": {
+          "average_in": 1.209,
+          "min_in": 0.75,
+          "max_in": 3.0,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:30:11",
+          "valid_period": [
+            "2026-10-30 12:00:00",
+            "2026-11-06 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        }
+      }
+    },
+    "shiprock_local": {
+      "name": "Farmington\u2013Shiprock only",
+      "area_sq_mi": 5463.8,
+      "periods": {
+        "Day 1": {
+          "average_in": 0.14,
+          "min_in": 0.01,
+          "max_in": 0.75,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:03:49",
+          "valid_period": [
+            "2026-10-30 12:00:00",
+            "2026-10-31 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Day 2": {
+          "average_in": 0.013,
+          "min_in": 0.0,
+          "max_in": 0.1,
+          "coverage_pct": 98.06,
+          "issue_time": "2026-10-30 10:05:18",
+          "valid_period": [
+            "2026-10-31 12:00:00",
+            "2026-11-01 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Day 3": {
+          "average_in": 0.563,
+          "min_in": 0.25,
+          "max_in": 4.0,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:07:03",
+          "valid_period": [
+            "2026-11-01 12:00:00",
+            "2026-11-02 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Days 4-5": {
+          "average_in": 0.003,
+          "min_in": 0.0,
+          "max_in": 0.1,
+          "coverage_pct": 17.82,
+          "issue_time": "2026-10-30 03:50:01",
+          "valid_period": [
+            "2026-11-02 12:00:00",
+            "2026-11-04 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Days 6-7": {
+          "average_in": 0.0,
+          "min_in": 0.0,
+          "max_in": 0.01,
+          "coverage_pct": 1.06,
+          "issue_time": "2026-10-30 03:50:01",
+          "valid_period": [
+            "2026-11-04 12:00:00",
+            "2026-11-06 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        },
+        "Days 1-7": {
+          "average_in": 0.85,
+          "min_in": 0.25,
+          "max_in": 5.0,
+          "coverage_pct": 100.0,
+          "issue_time": "2026-10-30 10:30:11",
+          "valid_period": [
+            "2026-10-30 12:00:00",
+            "2026-11-06 12:00:00"
+          ],
+          "note": "Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."
+        }
+      }
+    }
+  },
+  "divided_catchment_note": "Geographic polygon differences, not subtraction of precipitation averages. Navajo uses the NLDI dam outlet flowline COMID 17040463. Independent NLDI boundaries may differ slightly from published drainage areas.",
   "gauge_catchments": {
     "09365000": {
       "label": "San Juan Farmington",
@@ -8766,7 +9159,7 @@
   },
   "watershed_source": "https://hydro.nationalmap.gov/arcgis/rest/services/wbd/MapServer/4",
   "watershed_level": "USGS HUC8 full subbasins intersecting San Juan County, New Mexico",
-  "generated_utc": "2026-10-30T15:10:08.294612+00:00",
+  "generated_utc": "2026-10-30T16:00:11.234730+00:00",
   "location": "San Juan County NM",
   "source": "https://mapservices.weather.noaa.gov/vector/rest/services/precip/wpc_qpf/MapServer",
   "periods": {
@@ -8946,6 +9339,26 @@
       "09364010": {
         "average_in": 2.045,
         "grid_points": 543
+      },
+      "split_animas_upper": {
+        "average_in": 2.172,
+        "grid_points": 286
+      },
+      "split_animas_lower": {
+        "average_in": 1.846,
+        "grid_points": 287
+      },
+      "split_navajo": {
+        "average_in": 2.253,
+        "grid_points": 1348
+      },
+      "split_san_juan_local": {
+        "average_in": 1.43,
+        "grid_points": 1082
+      },
+      "split_shiprock_local": {
+        "average_in": 1.488,
+        "grid_points": 2280
       }
     },
     "note": "Point mean of a complete 168-hour deterministic NBM cycle; comparison guidance, not a WPC replacement."
@@ -8956,6 +9369,11 @@
     "elevation_source": "https://elevation.nationalmap.gov/arcgis/rest/services/3DEPElevation/ImageServer",
     "scope": "WPC probability polygons summarized by USGS 3DEP elevation band within San Juan County, New Mexico",
     "periods": {
+      "Day 1": [],
+      "Day 2": [],
+      "Day 3": []
+    },
+    "issued_by_day": {
       "Day 1": [],
       "Day 2": [],
       "Day 3": []

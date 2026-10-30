@@ -1,6 +1,6 @@
 # San Juan County, New Mexico WPC QPF
 
-Generated UTC: 2026-10-30T15:10:08.294612+00:00
+Generated UTC: 2026-10-30T16:00:11.234730+00:00
 
 | Period | Avg (in) | Min (in) | Max (in) | Coverage | WPC issue |
 |---|---:|---:|---:|---:|---|
@@ -10,6 +10,19 @@ Generated UTC: 2026-10-30T15:10:08.294612+00:00
 | Days 4-5 | 0.00 | 0.00 | 0.01 | 13.6% | 2026-10-30 03:50:01 |
 | Days 6-7 | 0.00 | 0.00 | 0.00 | 0.0% | 2026-10-30 03:50:01 |
 | Days 1-7 | 0.94 | 0.25 | 2.00 | 100.0% | 2026-10-30 10:30:11 |
+
+## Divided catchment precipitation (inches)
+
+Separate drainage-area averages; do not add. Forecast periods are not midnight-to-midnight days.
+| Drainage area | Area (sq mi) | Day 1 | Day 2 | Day 3 | Days 4–5 | Days 6–7 | Days 1–7 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Animas above Durango | 679.7 | 0.45 | 0.06 | 2.10 | 0.10 | 0.01 | 2.89 |
+| Animas Durango–Farmington only | 667.2 | 0.35 | 0.05 | 1.86 | 0.02 | 0.00 | 2.38 |
+| Navajo upstream basin | 3212.4 | 0.26 | 0.05 | 2.06 | 0.05 | 0.01 | 2.55 |
+| Navajo–Farmington excluding Animas | 2594.0 | 0.16 | 0.01 | 0.91 | 0.01 | 0.00 | 1.21 |
+| Farmington–Shiprock only | 5463.8 | 0.14 | 0.01 | 0.56 | 0.00 | 0.00 | 0.85 |
+
+Geographic polygon differences, not subtraction of precipitation averages. Navajo uses the NLDI dam outlet flowline COMID 17040463. Independent NLDI boundaries may differ slightly from published drainage areas.
 
 ## Gauge-upstream catchment QPF
 
@@ -290,6 +303,11 @@ Cycle UTC: 2026-10-30T12:00:00+00:00
 | La Plata River near Farmington | 1.74 | 244 |
 | Animas River at Farmington | 2.01 | 573 |
 | Animas River below Aztec | 2.04 | 543 |
+| Animas above Durango | 2.17 | 286 |
+| Animas Durango–Farmington only | 1.85 | 287 |
+| Navajo upstream basin | 2.25 | 1348 |
+| Navajo–Farmington excluding Animas | 1.43 | 1082 |
+| Farmington–Shiprock only | 1.49 | 2280 |
 
 QPF averages are forecast liquid-equivalent amounts, not observed rainfall or flood probabilities.
 
