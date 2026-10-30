@@ -18,6 +18,28 @@ def test_unmapped_area_counted_as_zero():
     assert 0 < result["average_in"] < 0.15
     assert result["min_in"] == 0.0
 
+
+def test_real_nldi_sliver_that_crosses_itself_only_after_projection():
+    from shapely import from_wkt, transform
+    from shapely.geometry import MultiPolygon
+    # Six vertices from the live Durango-to-Farmington polygon difference.
+    sliver=from_wkt('POLYGON ((-108.009372945 37.450220934, -108.00743655168783 37.44764611157881, -108.004590988 37.445130349, -108.00513611662494 37.44458722279768, -108.004557005 37.443817178, -108.009372945 37.450220934))')
+    region=MultiPolygon([box(-108.2,37.2,-108.1,37.3),sliver])
+    assert region.is_valid
+    assert not transform(region,qpf_monitor.PROJECT,interleaved=False).is_valid
+    repaired=qpf_monitor.projected_geometry(region)
+    assert repaired.is_valid
+    features=[{'geometry':box(-109,36,-107,38).__geo_interface__,
+               'properties':{'qpf':1.5,'units':'inches'}}]
+    assert summarize(region,features)['average_in']==1.5
+
+
+def test_zero_area_catchment_fails_explicitly():
+    from shapely.geometry import LineString
+    import pytest
+    with pytest.raises(ValueError,match='zero-area'):
+        summarize(LineString([(-108,37),(-108,38)]),[])
+
 def test_gauge_catchments_use_usgs_nldi(monkeypatch):
     calls=[]
     def fake_fetch(url,params):

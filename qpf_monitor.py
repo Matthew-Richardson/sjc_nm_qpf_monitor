@@ -6,7 +6,7 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from shapely.geometry import shape
-from shapely import transform
+from shapely import transform, make_valid
 from shapely.ops import unary_union
 from pyproj import Transformer
 from nbm_monitor import calculate as calculate_nbm
@@ -125,8 +125,22 @@ def gauge_catchment_geometries():
         result[site]={**metadata,"site":site,"geometry":boundary,"source":url}
     return result
 
+def projected_geometry(geometry):
+    """Repair precision-induced crossings after reprojection, before overlay."""
+    if not geometry.is_valid:
+        geometry=make_valid(geometry)
+    projected=transform(geometry,PROJECT,interleaved=False)
+    if not projected.is_valid:
+        previous_area=abs(projected.area)
+        projected=make_valid(projected)
+        if abs(projected.area-previous_area)>max(1.0,previous_area*.002):
+            raise ValueError("Geometry repair changed projected area beyond tolerance")
+    return projected
+
 def summarize(region,fs):
-    region=transform(region,PROJECT,interleaved=False)
+    region=projected_geometry(region)
+    if region.is_empty or region.area<=0:
+        raise ValueError("Cannot summarize an empty or zero-area catchment")
     parts=[]; amounts=[]; issue=set(); times=set()
     for f in fs:
         p=f["properties"]
@@ -135,7 +149,7 @@ def summarize(region,fs):
         g=shape(f["geometry"])
         if not g.is_valid: g=g.buffer(0)
         if g.is_empty: continue
-        clip=transform(g,PROJECT,interleaved=False).intersection(region)
+        clip=projected_geometry(g).intersection(region)
         if clip.area>0:
             parts.append((clip,float(p["qpf"])))
             if p.get("issue_time"): issue.add(str(p["issue_time"]))
