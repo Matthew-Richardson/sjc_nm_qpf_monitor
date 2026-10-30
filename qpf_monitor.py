@@ -6,7 +6,8 @@ import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from shapely.geometry import shape
-from shapely.ops import transform, unary_union
+from shapely import transform
+from shapely.ops import unary_union
 from pyproj import Transformer
 from nbm_monitor import calculate as calculate_nbm
 
@@ -124,7 +125,7 @@ def gauge_catchment_geometries():
     return result
 
 def summarize(region,fs):
-    region=transform(PROJECT,region)
+    region=transform(region,PROJECT,interleaved=False)
     parts=[]; amounts=[]; issue=set(); times=set()
     for f in fs:
         p=f["properties"]
@@ -133,7 +134,7 @@ def summarize(region,fs):
         g=shape(f["geometry"])
         if not g.is_valid: g=g.buffer(0)
         if g.is_empty: continue
-        clip=transform(PROJECT,g).intersection(region)
+        clip=transform(g,PROJECT,interleaved=False).intersection(region)
         if clip.area>0:
             parts.append((clip,float(p["qpf"])))
             if p.get("issue_time"): issue.add(str(p["issue_time"]))
@@ -157,7 +158,9 @@ def summarize(region,fs):
             "note":"Areas outside WPC QPF contours are treated as zero; area average is a lower-bound approximation."}
 
 def run():
+    print("Loading San Juan County boundary...",flush=True)
     geom=county()
+    print("Loading full HUC8/HUC10 watershed boundaries...",flush=True)
     watershed_errors=[]
     try:
         basins=watershed_geometries(geom)
@@ -171,6 +174,7 @@ def run():
         fine_basins={}
         watershed_errors.append("HUC10: "+str(exc))
         print("Optional HUC10 watershed detail unavailable:",exc)
+    print("Loading five USGS upstream gauge catchments...",flush=True)
     catchments=gauge_catchment_geometries()
     from shapely.ops import unary_union as union
     extent=union([geom]+[b["geometry"] for b in basins.values()]+[b["geometry"] for b in fine_basins.values()]+[b["geometry"] for b in catchments.values()])
@@ -181,6 +185,7 @@ def run():
     fine_output={code:{"name":v["name"],"huc10":code,"parent_huc8":v["parent_huc8"],"periods":{}} for code,v in fine_basins.items()}
     catchment_output={site:{"label":v["label"],"name":v["name"],"site":site,"source":v["source"],"periods":{}} for site,v in catchments.items()}
     for label,layer in LAYERS.items():
+        print(f"WPC {label}: querying and calculating county, {len(basins)} HUC8s, {len(fine_basins)} HUC10s, and five gauge basins...",flush=True)
         f=features(f"{WPC}/{layer}",{"where":"1=1","outFields":"qpf,units,issue_time,start_time,end_time",
                "geometry":bbox,"geometryType":"esriGeometryEnvelope","inSR":4326,
                "spatialRel":"esriSpatialRelIntersects","outSR":4326,"returnGeometry":"true"})
@@ -203,6 +208,7 @@ def run():
             output[label]["valid_period"]=[attr.get("start_time"),attr.get("end_time")]
     nbm_regions={"county":geom}
     nbm_regions.update({site:catchment["geometry"] for site,catchment in catchments.items()})
+    print("WPC calculations complete. Starting separate 168-hour NBM comparison...",flush=True)
     try:
         nbm=calculate_nbm(nbm_regions)
     except Exception as exc:
@@ -273,4 +279,5 @@ def run():
     Path("data/latest.md").write_text("\n".join(lines)+"\n")
     print("\n".join(lines))
 if __name__=="__main__": run()
+
 

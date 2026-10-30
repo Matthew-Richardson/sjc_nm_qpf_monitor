@@ -1,6 +1,8 @@
 """Seven-day deterministic NBM QPF averages for San Juan County, New Mexico and watched HUC10s."""
 from datetime import datetime, timedelta, timezone
 import time
+from concurrent.futures import ThreadPoolExecutor
+from collections import deque
 
 import numpy as np
 import requests
@@ -96,16 +98,35 @@ def _latest_complete_cycle(now=None):
     raise RuntimeError("No complete NBM synoptic cycle found; " + " | ".join(errors[-4:]))
 
 
+def forecast_messages(cycle):
+    """Prefetch at most four fields; yield in the original accumulation order."""
+    hours = iter(FORECAST_HOURS)
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        pending = deque()
+        for hour in hours:
+            pending.append((hour, pool.submit(fetch_apcp_message, cycle, hour)))
+            if len(pending) == 4:
+                break
+        while pending:
+            hour, future = pending.popleft()
+            yield hour, future.result()
+            following = next(hours, None)
+            if following is not None:
+                pending.append((following, pool.submit(fetch_apcp_message, cycle, following)))
+
+
 def calculate(regions, now=None):
     """Average a complete rolling 168-hour NBM deterministic QPF over each polygon."""
     from eccodes import codes_get_array, codes_new_from_message, codes_release
 
     cycle = _latest_complete_cycle(now)
+    print(f"NBM cycle {cycle:%Y-%m-%d %HZ}: downloading {len(FORECAST_HOURS)} accumulation fields (four at a time)...",flush=True)
     masks = None
     sums = {name: 0.0 for name in regions}
     counts = {}
-    for forecast_hour in FORECAST_HOURS:
-        message = fetch_apcp_message(cycle, forecast_hour)
+    for field_number, (forecast_hour, message) in enumerate(forecast_messages(cycle), 1):
+        if field_number == 1 or field_number % 10 == 0 or field_number == len(FORECAST_HOURS):
+            print(f"NBM field {field_number}/{len(FORECAST_HOURS)}: forecast hour {forecast_hour}",flush=True)
         handle = codes_new_from_message(message)
         try:
             values = np.asarray(codes_get_array(handle, "values"), dtype=float)
@@ -142,4 +163,5 @@ def calculate(regions, now=None):
         "totals": totals,
         "note": "Point mean of a complete 168-hour deterministic NBM cycle; comparison guidance, not a WPC replacement.",
     }
+
 

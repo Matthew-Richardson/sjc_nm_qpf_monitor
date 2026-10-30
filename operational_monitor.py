@@ -10,7 +10,7 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from shapely.geometry import shape
 from qpf_monitor import county, features, PROJECT
-from shapely.ops import transform
+from shapely import transform
 
 LOCAL = ZoneInfo("America/Denver")
 RIVERS = {"arfn5": "Animas at Farmington", "frmn5": "San Juan at Farmington",
@@ -137,7 +137,7 @@ def outlook(day, boundary, now):
         geom = shape(row["geometry"])
         if not geom.is_valid:
             geom = geom.buffer(0)
-        if transform(PROJECT, geom.intersection(boundary)).area < 1_000_000:
+        if transform(geom.intersection(boundary), PROJECT, interleaved=False).area < 1_000_000:
             continue
         level = int(p["dn"])
         if level > result["level"]:
@@ -248,4 +248,5 @@ def message_lines(current, changes):
     if current.get("errors"):
         lines.append("Some official data unavailable; prior risk retained. See run log.")
     return lines
+
 
